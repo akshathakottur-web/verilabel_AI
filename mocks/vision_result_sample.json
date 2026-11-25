@@ -1,0 +1,216 @@
+{
+  "image_quality": {
+    "status": "ok",
+    "reason": ""
+  },
+  "detections": [
+    {
+      "class": "fssai_logo",
+      "confidence": 0.93,
+      "box": [
+        40,
+        880,
+        140,
+        960
+      ]
+    },
+    {
+      "class": "veg_symbol",
+      "confidence": 0.95,
+      "box": [
+        500,
+        60,
+        560,
+        120
+      ]
+    },
+    {
+      "class": "nutrition_table",
+      "confidence": 0.88,
+      "box": [
+        300,
+        400,
+        700,
+        760
+      ]
+    }
+  ],
+  "ocr_lines": [
+    {
+      "text": "SAMPLE MARIE BISCUITS",
+      "confidence": 0.96,
+      "box": [
+        100,
+        140,
+        480,
+        190
+      ],
+      "language": "en"
+    },
+    {
+      "text": "शाकाहारी",
+      "confidence": 0.81,
+      "box": [
+        570,
+        60,
+        690,
+        120
+      ],
+      "language": "hi"
+    },
+    {
+      "text": "INGREDIENTS: Wheat flour (maida), Sugar, Edible vegetable oil (Palm), Invert syrup, Milk solids, Raising agents, Iodised salt.",
+      "confidence": 0.89,
+      "box": [
+        60,
+        230,
+        740,
+        330
+      ],
+      "language": "en"
+    },
+    {
+      "text": "NUTRITION INFORMATION (Approx. values per 100 g)",
+      "confidence": 0.92,
+      "box": [
+        310,
+        410,
+        690,
+        440
+      ],
+      "language": "en"
+    },
+    {
+      "text": "Energy 450 kcal",
+      "confidence": 0.94,
+      "box": [
+        320,
+        450,
+        520,
+        480
+      ],
+      "language": "en"
+    },
+    {
+      "text": "Protein 7 g",
+      "confidence": 0.93,
+      "box": [
+        320,
+        485,
+        480,
+        515
+      ],
+      "language": "en"
+    },
+    {
+      "text": "Carbohydrate 76 g",
+      "confidence": 0.91,
+      "box": [
+        320,
+        520,
+        520,
+        550
+      ],
+      "language": "en"
+    },
+    {
+      "text": "Total Sugars 22 g",
+      "confidence": 0.9,
+      "box": [
+        320,
+        555,
+        520,
+        585
+      ],
+      "language": "en"
+    },
+    {
+      "text": "Total Fat 14 g",
+      "confidence": 0.92,
+      "box": [
+        320,
+        590,
+        500,
+        620
+      ],
+      "language": "en"
+    },
+    {
+      "text": "Saturated Fat 6 g",
+      "confidence": 0.88,
+      "box": [
+        320,
+        625,
+        520,
+        655
+      ],
+      "language": "en"
+    },
+    {
+      "text": "Sodium 330 mg",
+      "confidence": 0.62,
+      "box": [
+        320,
+        660,
+        500,
+        690
+      ],
+      "language": "en"
+    },
+    {
+      "text": "FSSAI Lic. No. 10012345678901",
+      "confidence": 0.9,
+      "box": [
+        160,
+        890,
+        520,
+        930
+      ],
+      "language": "en"
+    },
+    {
+      "text": "Net Wt. 200 g",
+      "confidence": 0.95,
+      "box": [
+        560,
+        800,
+        720,
+        840
+      ],
+      "language": "en"
+    },
+    {
+      "text": "Mfg. Date: 01/10/2026",
+      "confidence": 0.93,
+      "box": [
+        560,
+        850,
+        780,
+        885
+      ],
+      "language": "en"
+    },
+    {
+      "text": "Best Before: 31/03/2027",
+      "confidence": 0.91,
+      "box": [
+        560,
+        890,
+        780,
+        925
+      ],
+      "language": "en"
+    },
+    {
+      "text": "Manufactured by: Sample Foods Pvt Ltd, Industrial Area, Mysuru, Karnataka - 570001",
+      "confidence": 0.86,
+      "box": [
+        60,
+        960,
+        760,
+        1010
+      ],
+      "language": "en"
+    }
+  ]
+}

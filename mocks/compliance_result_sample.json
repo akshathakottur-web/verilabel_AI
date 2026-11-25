@@ -1,0 +1,73 @@
+{
+  "image_quality_warning": null,
+  "rules": [
+    {
+      "rule_id": "R01",
+      "name": "Name of the food",
+      "status": "PASS",
+      "reason": "Food name found"
+    },
+    {
+      "rule_id": "R02",
+      "name": "List of ingredients",
+      "status": "PASS",
+      "reason": "Ingredients list found"
+    },
+    {
+      "rule_id": "R03",
+      "name": "Nutrition information",
+      "status": "PASS",
+      "reason": "Nutrition table found with values"
+    },
+    {
+      "rule_id": "R04",
+      "name": "Allergen declaration",
+      "status": "FAIL",
+      "reason": "No allergen declaration (Contains: ...) found"
+    },
+    {
+      "rule_id": "R05",
+      "name": "Veg / non-veg symbol",
+      "status": "PASS",
+      "reason": "Veg symbol detected"
+    },
+    {
+      "rule_id": "R06",
+      "name": "Net quantity",
+      "status": "PASS",
+      "reason": "Net quantity found"
+    },
+    {
+      "rule_id": "R07",
+      "name": "Manufacturing date",
+      "status": "PASS",
+      "reason": "Manufacturing date found"
+    },
+    {
+      "rule_id": "R08",
+      "name": "Expiry or best-before date",
+      "status": "PASS",
+      "reason": "Best-before date found"
+    },
+    {
+      "rule_id": "R09",
+      "name": "FSSAI logo",
+      "status": "PASS",
+      "reason": "FSSAI logo detected"
+    },
+    {
+      "rule_id": "R10",
+      "name": "FSSAI licence number (14 digits)",
+      "status": "PASS",
+      "reason": "14-digit licence number found"
+    },
+    {
+      "rule_id": "R11",
+      "name": "Manufacturer name and address",
+      "status": "PASS",
+      "reason": "Manufacturer address found"
+    }
+  ],
+  "score": 91,
+  "verdict": "PARTIAL"
+}

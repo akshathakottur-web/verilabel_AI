@@ -1,0 +1,12 @@
+# Core packages for Member 1 and Member 3
+# (After everyone has installed them and the project runs, Member 1 can run
+#  "pip freeze" and pin exact versions here.)
+Django
+djangorestframework
+celery
+redis
+psycopg2-binary
+python-dotenv
+Pillow
+rapidfuzz
+reportlab

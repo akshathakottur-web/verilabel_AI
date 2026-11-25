@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Secrets and local settings (never push these)
+.env
+
+# Django local files
+db.sqlite3
+media/
+staticfiles/
+
+# AI data too big for GitHub (share through Google Drive instead)
+ml_data/dataset/
+ml_data/raw_photos/
+runs/
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,150 @@
+{
+  "scan_id": 1,
+  "batch_id": null,
+  "status": "done",
+  "image_url": "/media/scans/sample.jpg",
+  "uploaded_by": {
+    "user_id": "CUST001",
+    "name": "Sample Customer",
+    "role": "customer"
+  },
+  "created_at": "2026-11-25T10:30:00Z",
+  "extracted_fields": {
+    "food_name": {
+      "found": true,
+      "value": "Sample Marie Biscuits",
+      "confidence": 0.96
+    },
+    "ingredients": {
+      "found": true,
+      "value": "Wheat flour (maida), Sugar, Edible vegetable oil (Palm), Invert syrup, Milk solids, Raising agents, Iodised salt",
+      "confidence": 0.89
+    },
+    "nutrition": {
+      "found": true,
+      "value": {
+        "energy_kcal": 450,
+        "protein_g": 7,
+        "carbohydrate_g": 76,
+        "total_sugars_g": 22,
+        "total_fat_g": 14,
+        "saturated_fat_g": 6,
+        "sodium_mg": 330
+      },
+      "confidence": 0.86
+    },
+    "allergens": {
+      "found": false,
+      "value": null,
+      "confidence": 0.0
+    },
+    "net_quantity": {
+      "found": true,
+      "value": "200 g",
+      "confidence": 0.95
+    },
+    "manufacturing_date": {
+      "found": true,
+      "value": "2026-10-01",
+      "confidence": 0.93
+    },
+    "expiry_date": {
+      "found": true,
+      "value": "2027-03-31",
+      "confidence": 0.91
+    },
+    "fssai_licence_number": {
+      "found": true,
+      "value": "10012345678901",
+      "confidence": 0.9
+    },
+    "manufacturer_address": {
+      "found": true,
+      "value": "Sample Foods Pvt Ltd, Industrial Area, Mysuru, Karnataka - 570001",
+      "confidence": 0.86
+    },
+    "veg_nonveg_mark": {
+      "found": true,
+      "value": "veg",
+      "confidence": 0.95
+    }
+  },
+  "compliance_result": {
+    "image_quality_warning": null,
+    "rules": [
+      {
+        "rule_id": "R01",
+        "name": "Name of the food",
+        "status": "PASS",
+        "reason": "Food name found"
+      },
+      {
+        "rule_id": "R02",
+        "name": "List of ingredients",
+        "status": "PASS",
+        "reason": "Ingredients list found"
+      },
+      {
+        "rule_id": "R03",
+        "name": "Nutrition information",
+        "status": "PASS",
+        "reason": "Nutrition table found with values"
+      },
+      {
+        "rule_id": "R04",
+        "name": "Allergen declaration",
+        "status": "FAIL",
+        "reason": "No allergen declaration (Contains: ...) found"
+      },
+      {
+        "rule_id": "R05",
+        "name": "Veg / non-veg symbol",
+        "status": "PASS",
+        "reason": "Veg symbol detected"
+      },
+      {
+        "rule_id": "R06",
+        "name": "Net quantity",
+        "status": "PASS",
+        "reason": "Net quantity found"
+      },
+      {
+        "rule_id": "R07",
+        "name": "Manufacturing date",
+        "status": "PASS",
+        "reason": "Manufacturing date found"
+      },
+      {
+        "rule_id": "R08",
+        "name": "Expiry or best-before date",
+        "status": "PASS",
+        "reason": "Best-before date found"
+      },
+      {
+        "rule_id": "R09",
+        "name": "FSSAI logo",
+        "status": "PASS",
+        "reason": "FSSAI logo detected"
+      },
+      {
+        "rule_id": "R10",
+        "name": "FSSAI licence number (14 digits)",
+        "status": "PASS",
+        "reason": "14-digit licence number found"
+      },
+      {
+        "rule_id": "R11",
+        "name": "Manufacturer name and address",
+        "status": "PASS",
+        "reason": "Manufacturer address found"
+      }
+    ],
+    "score": 91,
+    "verdict": "PARTIAL"
+  },
+  "review": {
+    "status": "pending",
+    "reviewed_by": null,
+    "reviewed_at": null
+  }
+}

@@ -1,0 +1,5 @@
+# Extra packages for Member 2 (AI Vision). These are big downloads.
+# The final demo computer needs both requirements.txt and this file.
+opencv-python
+ultralytics
+easyocr
