@@ -63,3 +63,8 @@ compliance_result, review (status "pending" or "reviewed", reviewed_by, reviewed
 ## 6. Mock switch
 In .env, USE_MOCK_VISION=True makes Member 1's pipeline use mocks/vision_result_sample.json
 instead of calling ai_vision. Set it to False when Member 2's step is merged.
+## 7. Low-quality scans (added in Stage 3)
+If the VISION RESULT says image_quality is "too_low", the scan status becomes "low_quality".
+compliance_result then holds image_quality_warning (the reason), an empty rules list,
+and score and verdict set to null. extracted_fields stays null.
+If anything crashes, the status becomes "failed" and the scan has an error message.

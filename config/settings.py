@@ -109,6 +109,8 @@ REST_FRAMEWORK = {
 CELERY_BROKER_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
 CELERY_RESULT_BACKEND = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
 CELERY_TIMEZONE = 'Asia/Kolkata'
-
+# True = run tasks immediately inside Django (no Memurai needed).
+# False = use Memurai and a separate Celery worker.
+CELERY_TASK_ALWAYS_EAGER = os.getenv('CELERY_EAGER', 'True') == 'True'
 USE_MOCK_VISION = os.getenv('USE_MOCK_VISION', 'True') == 'True'
 ALLOW_ADMIN_SIGNUP = True
