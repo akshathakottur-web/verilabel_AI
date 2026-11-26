@@ -68,3 +68,10 @@ If the VISION RESULT says image_quality is "too_low", the scan status becomes "l
 compliance_result then holds image_quality_warning (the reason), an empty rules list,
 and score and verdict set to null. extracted_fields stays null.
 If anything crashes, the status becomes "failed" and the scan has an error message.
+
+## 8. Additions (after Member 3's questions)
+The SCAN RECORD now also has two top-level fields:
+- product_name: text, empty "" if no product name was found
+- score: number 0 to 100, or null for scans that are queued, processing, failed or low_quality
+Verdict values are exactly COMPLIANT, PARTIAL and NON_COMPLIANT, or null when the scan has no result.
+Member 1 sets the score limits for each verdict in Stage 4. Pages must show the verdict as given and must not work it out from the score.

@@ -2,6 +2,8 @@
   "scan_id": 1,
   "batch_id": null,
   "status": "done",
+  "product_name": "Sample Marie Biscuits",
+  "score": 91,
   "image_url": "/media/scans/sample.jpg",
   "uploaded_by": {
     "user_id": "CUST001",

@@ -9,6 +9,7 @@ class ScanSerializer(serializers.ModelSerializer):
     batch_id = serializers.IntegerField(read_only=True)
     image_url = serializers.SerializerMethodField()
     uploaded_by = serializers.SerializerMethodField()
+    score = serializers.SerializerMethodField()
     review = serializers.SerializerMethodField()
 
     class Meta:
@@ -20,6 +21,8 @@ class ScanSerializer(serializers.ModelSerializer):
             'image_url',
             'uploaded_by',
             'created_at',
+            'product_name',
+            'score',
             'extracted_fields',
             'compliance_result',
             'review',
@@ -31,6 +34,10 @@ class ScanSerializer(serializers.ModelSerializer):
     def get_uploaded_by(self, obj):
         user = obj.uploaded_by
         return {'user_id': user.username, 'name': user.name, 'role': user.role}
+
+    def get_score(self, obj):
+        result = obj.compliance_result or {}
+        return result.get('score')
 
     def get_review(self, obj):
         return {
