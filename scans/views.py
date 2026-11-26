@@ -12,6 +12,7 @@ from rest_framework.views import APIView
 from pipeline.tasks import process_scan
 
 from .models import Batch, Scan
+from .permissions import can_view_scan
 from .serializers import ScanSerializer
 
 ALLOWED_EXTENSIONS = {'.jpg', '.jpeg', '.png'}
@@ -106,7 +107,6 @@ class ScanDetailView(APIView):
             .filter(id=scan_id)
             .first()
         )
-        is_owner = scan is not None and scan.uploaded_by_id == request.user.id
-        if scan is None or not (is_owner or request.user.role == 'admin'):
+        if scan is None or not can_view_scan(request.user, scan):
             return Response({'error': 'Scan not found.'}, status=status.HTTP_404_NOT_FOUND)
         return Response(ScanSerializer(scan).data)

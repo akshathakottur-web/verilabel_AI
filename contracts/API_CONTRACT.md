@@ -71,4 +71,21 @@ A plain link cannot send the token header, so the page must use fetch with the h
 
 ### Verdict colours (for pages)
 COMPLIANT = green, PARTIAL = amber, NON_COMPLIANT = red, null = grey "Not available".
+## Inspector reviews customer scans too (decided after Member 3's question, guide to confirm)
 
+Inspectors can review any customer scan, and scans from their own batches.
+Without this, a customer would never see a review status.
+
+- GET /api/scans/<scan_id>/ now also works for an Inspector when the scan belongs to a customer.
+  (Everything else is still 404 "Scan not found." for other people's scans.)
+  Member 3: for the report download use the same rule: from scans.permissions import can_view_scan.
+- NEW (Member 3 builds): GET /api/inspector/customer-scans/ returns SCAN RECORDS of all customers' scans
+  with status "done", newest first. Optional filter: ?review=pending or ?review=reviewed.
+  Only Inspectors and Admins may call it, anyone else gets 403.
+- POST /api/inspector/scans/<scan_id>/review/ (Member 3 builds) works for customer scans and for the
+  inspector's own batch scans. Body: {"confirmation": "text typed by the inspector"}.
+  It sets review status "reviewed", reviewed_by, reviewed_at and review_note, and returns the updated SCAN RECORD.
+  Errors (400): scan not done yet, already reviewed, or empty confirmation text.
+- The customer sees the result in review: status ("pending" or "reviewed"), reviewed_by (the inspector's ID)
+  and reviewed_at. History shows "Not reviewed yet" only when status is "pending".
+- Page: Member 3 may add a new page inspector_customers.html (or a tab on inspector.html) for this list.
