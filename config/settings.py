@@ -114,3 +114,5 @@ CELERY_TIMEZONE = 'Asia/Kolkata'
 CELERY_TASK_ALWAYS_EAGER = os.getenv('CELERY_EAGER', 'True') == 'True'
 USE_MOCK_VISION = os.getenv('USE_MOCK_VISION', 'True') == 'True'
 ALLOW_ADMIN_SIGNUP = True
+# Score limit for the verdict
+VERDICT_PARTIAL_MIN = 70

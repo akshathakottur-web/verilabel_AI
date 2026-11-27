@@ -120,3 +120,15 @@ How Member 1 uses them:
 - fssai_logo -> rule R09
 
 A missing detection is not treated as proof that the item is absent. The text step also checks the OCR lines.
+## 10. Rules, scoring and verdict (Stage 4)
+- score = passed rule weight / total weight of the enabled rules, rounded, from 0 to 100.
+- verdict: COMPLIANT = every enabled rule passed; PARTIAL = score 70 or more; NON_COMPLIANT = below 70.
+  If there are no enabled rules, score and verdict are null.
+- Dates are YYYY-MM-DD. A date given only as month and year becomes the first day of the month
+  (manufacturing) or the last day of the month (expiry).
+- If expiry is given as a period ("6 months from manufacture"), it becomes a date when the manufacturing date was read.
+  Otherwise expiry_date.value is that text, for example "6 months from manufacture".
+- Nutrition values are numbers: energy in kcal, protein, carbohydrate, sugars and fat in g, sodium in mg.
+  Per-100 g and per-serve values are not told apart.
+- Rule reasons are plain sentences (for example "Ingredients mention milk, wheat but no allergen declaration was found").
+  Pages show them as given.

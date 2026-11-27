@@ -89,3 +89,21 @@ Without this, a customer would never see a review status.
 - The customer sees the result in review: status ("pending" or "reviewed"), reviewed_by (the inspector's ID)
   and reviewed_at. History shows "Not reviewed yet" only when status is "pending".
 - Page: Member 3 may add a new page inspector_customers.html (or a tab on inspector.html) for this list.
+## Admin rules (Stage 4 decisions)
+A rule object has exactly these fields: rule_id, name, check_type, field_key, weight (1 to 10), enabled (true or false).
+
+check_type values: field_found, detection_found, nutrition_values, allergen_declared, fssai_licence_14
+field_key:
+- for field_found: one of food_name, ingredients, nutrition, allergens, net_quantity, manufacturing_date,
+  expiry_date, fssai_licence_number, manufacturer_address, veg_nonveg_mark
+- for detection_found: one of the 7 YOLO classes (see section 9 of PIPELINE_CONTRACT.md)
+- for nutrition_values: comma-separated nutrient names from energy_kcal, protein_g, carbohydrate_g,
+  total_sugars_g, total_fat_g, saturated_fat_g, sodium_mg
+- for allergen_declared and fssai_licence_14: ignored
+
+Member 3's Admin API calls these functions (from compliance.services import list_rules, create_rule, update_rule):
+- list_rules() returns a list of rule objects, including switched-off rules
+- create_rule(data) returns the new rule (rule_id is made automatically, like R12, if not given)
+- update_rule(rule_id, data) returns the updated rule; data may hold only the fields to change
+They raise ValueError with a message the page can show. The API returns that as 400 {"error": "message"}.
+Rules in the database are used for every new scan. Changing a rule does not change old scans.
