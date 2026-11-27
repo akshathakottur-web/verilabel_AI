@@ -205,6 +205,64 @@ class BoxAndTextTests(unittest.TestCase):
         self.assertEqual(r09['status'], 'FAIL')
 
 
+class AllergenAndLicenceTextFirstTests(unittest.TestCase):
+    """The allergen box and the licence box are only a help. The OCR text decides."""
+
+    def box(self, class_name, y1, y2, confidence=0.9):
+        return {'class': class_name, 'confidence': confidence, 'box': [0, y1, 700, y2]}
+
+    def test_allergen_box_over_the_ingredients_is_not_an_allergen_statement(self):
+        vision = make_vision(
+            [('INGREDIENTS: Wheat flour, Milk solids, Sugar', 100)],
+            [self.box('allergen', 90, 140)])
+        fields = extract_fields(vision)
+        self.assertFalse(fields['allergens']['found'])
+        results, _, _ = evaluate_rules(DEFAULT_RULES, fields, vision['detections'])
+        r04 = [r for r in results if r['rule_id'] == 'R04'][0]
+        self.assertEqual(r04['status'], 'FAIL')
+
+    def test_allergen_text_wins_over_a_wrong_box(self):
+        vision = make_vision(
+            [('Net Wt. 100 g', 100), ('Contains: Milk and Soy', 300)],
+            [self.box('allergen', 90, 140)])
+        self.assertEqual(extract_fields(vision)['allergens']['value'], 'Milk and Soy')
+
+    def test_allergen_statement_on_two_lines(self):
+        vision = make_vision([
+            ('Allergen information: Contains wheat (gluten), milk and', 100),
+            ('soy.', 135),
+            ('Store in a cool and dry place', 170)])
+        self.assertEqual(extract_fields(vision)['allergens']['value'], 'Contains wheat (gluten), milk and soy')
+
+    def test_allergen_does_not_swallow_the_next_sentence(self):
+        vision = make_vision([
+            ('Allergen information: Contains milk.', 100),
+            ('Store in a cool and dry place', 135)])
+        self.assertEqual(extract_fields(vision)['allergens']['value'], 'Contains milk')
+
+    def test_licence_with_every_digit_spaced(self):
+        vision = make_vision([('FSSAI Lic. No. 1 0 0 1 2 3 4 5 6 7 8 9 0 1', 100)])
+        self.assertEqual(extract_fields(vision)['fssai_licence_number']['value'], '10012345678901')
+
+    def test_licence_number_on_the_next_line(self):
+        vision = make_vision([('FSSAI Lic. No.', 100), ('10012345678901', 135)])
+        self.assertEqual(extract_fields(vision)['fssai_licence_number']['value'], '10012345678901')
+
+    def test_date_after_the_licence_heading_is_not_taken_as_licence(self):
+        vision = make_vision([('FSSAI Lic. No.', 100), ('Mfg 01 10 2026', 135)])
+        self.assertFalse(extract_fields(vision)['fssai_licence_number']['found'])
+
+    def test_licence_text_wins_over_a_wrong_box(self):
+        vision = make_vision(
+            [('Barcode 12345678901234', 100), ('FSSAI Lic. No. 10012345678901', 300)],
+            [self.box('fssai_no', 90, 140)])
+        self.assertEqual(extract_fields(vision)['fssai_licence_number']['value'], '10012345678901')
+
+    def test_no_fssai_box_and_no_heading_finds_a_lone_14_digit_number(self):
+        vision = make_vision([('Lot 5', 50), ('10012345678901', 100)])
+        self.assertEqual(extract_fields(vision)['fssai_licence_number']['value'], '10012345678901')
+
+
 class ScoringTests(unittest.TestCase):
     def test_all_pass_is_compliant(self):
         rules = [{'rule_id': 'A', 'name': 'x', 'check_type': 'field_found',

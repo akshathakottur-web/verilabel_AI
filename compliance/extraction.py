@@ -272,32 +272,59 @@ def find_ingredients(lines, vision_result):
     return missing()
 
 
+def is_allergen_statement(text):
+    low = text.lower()
+    if has_word(text, 'allergen') or has_word(text, 'allergy'):
+        return True
+    mentions = any(re.search(r'\b' + w + r'\b', low) for w in ALLERGEN_WORDS)
+    return bool(re.search(r'\bcontains?\b', low) and mentions)
+
+
+def wraps_to_next_line(text):
+    """True if the sentence clearly goes on in the next line (ends with a comma, 'and', or an open bracket)."""
+    stripped = text.rstrip().lower()
+    return (stripped.endswith((',', ';', '&', ' and', ' or', ' &'))
+            or stripped.count('(') > stripped.count(')'))
+
+
+def clean_allergen_text(raw):
+    raw = clean_text(raw)
+    if ':' in raw[:30]:
+        raw = raw.split(':', 1)[1]
+    elif has_word(raw[:20], 'contains') or has_word(raw[:20], 'allergen'):
+        raw = strip_header(raw, 'contains') if has_word(raw[:20], 'contains') else strip_header(raw, 'allergen')
+    return raw.strip(' .')
+
+
 def find_allergens(lines, vision_result):
-    """Uses the YOLO box when it looks like an allergen statement, otherwise searches the OCR text."""
-    block = lines_in_boxes(lines, boxes_of(vision_result, 'allergen'))
-    if block:
-        raw = clean_text(' '.join(l['text'] for l in block))
-        low = raw.lower()
-        looks_right = (has_word(raw, 'allergen') or has_word(raw, 'allergy') or has_word(raw, 'contains')
-                       or any(re.search(r'\b' + w + r'\b', low) for w in ALLERGEN_WORDS))
-        if looks_right:
-            text = strip_header(raw, 'allergen') if has_word(raw, 'allergen') else raw
-            text = strip_header(text, 'contains') if has_word(text, 'contains') else text
-            text = text.strip(' .')
+    """The allergen box is not reliable, so the OCR text is searched first.
+
+    The box is only a help: it is used when the text search finds nothing, and then
+    only if its own text starts like an allergen statement (heading words such as
+    'Contains' or 'Allergen'), never just because it mentions milk or wheat.
+    """
+    for i, line in enumerate(lines):
+        if not is_allergen_statement(line['text']):
+            continue
+        block = [line]
+        while wraps_to_next_line(block[-1]['text']) and i + len(block) < len(lines):
+            nxt = lines[i + len(block)]
+            gap = nxt['box'][1] - block[-1]['box'][3]
+            height = max(block[-1]['box'][3] - block[-1]['box'][1], 1)
+            if gap > 0.8 * height or is_header_line(nxt['text']) or len(block) >= 3:
+                break
+            block.append(nxt)
+        text = clean_allergen_text(' '.join(l['text'] for l in block))
+        if len(text) >= 3:
+            return found(text, min_conf(block))
+    box_lines = lines_in_boxes(lines, boxes_of(vision_result, 'allergen'))
+    if box_lines:
+        raw = clean_text(' '.join(l['text'] for l in box_lines))
+        start = raw[:25]
+        if has_word(start, 'allergen') or has_word(start, 'allergy') or has_word(start, 'contains'):
+            text = clean_allergen_text(raw)
             if len(text) >= 3:
-                return found(text, min_conf(block))
-    for line in lines:
-        low = line['text'].lower()
-        statement = has_word(line['text'], 'allergen') or has_word(line['text'], 'allergy')
-        mentions = re.search(r'\bcontains?\b', low) and any(
-            re.search(r'\b' + w + r'\b', low) for w in ALLERGEN_WORDS)
-        if statement or mentions:
-            text = line['text']
-            if ':' in text:
-                text = text.split(':', 1)[1]
-            text = text.strip(' .')
-            if len(text) >= 3:
-                return found(text, line['conf'])
+                return found(text, min_conf(box_lines))
     return missing()
 
 
@@ -522,21 +549,36 @@ def find_dates(lines):
 
 
 def find_fssai_number(lines, vision_result):
-    pool = lines_in_boxes(lines, boxes_of(vision_result, 'fssai_no'))
-    for line in lines:
+    """Finds the licence number mainly from OCR text ('FSSAI' / 'Lic. No.' lines).
+
+    The fssai_no box is only a help and comes after the text lines.
+    A line taken only because it follows a heading line must hold exactly 14 digits.
+    """
+    pool, seen = [], set()
+
+    def add(line, strict=False):
+        if id(line) not in seen:
+            seen.add(id(line))
+            pool.append((line, strict))
+
+    for i, line in enumerate(lines):
         low = line['text'].lower()
-        if line in pool:
-            continue
         if has_word(line['text'], 'fssai') or re.search(r'\blic(?:ence|ense)?\b', low):
-            pool.append(line)
+            add(line)
+            # The number is sometimes in the next OCR line.
+            if i + 1 < len(lines) and not re.search(r'\d{6}', fix_digits(line['text'])):
+                add(lines[i + 1], strict=True)
+    for line in lines_in_boxes(lines, boxes_of(vision_result, 'fssai_no')):
+        add(line)
+
     best = None
-    for line in pool:
+    for line, strict in pool:
         text = fix_digits(line['text'])
-        for match in re.finditer(r'\d[\d \-]{6,22}\d', text):
+        for match in re.finditer(r'\d[\d \-]{6,34}\d', text):
             digits = re.sub(r'\D', '', match.group(0))
             if len(digits) == 14:
                 return found(digits, line['conf'])
-            if len(digits) >= 8 and (best is None or len(digits) > len(best[0])):
+            if not strict and len(digits) >= 8 and (best is None or len(digits) > len(best[0])):
                 best = (digits, line['conf'])
     if best:
         return found(best[0], best[1])
