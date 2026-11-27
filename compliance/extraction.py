@@ -182,6 +182,7 @@ def is_header_line(text):
     return bool(
         has_word(text, 'nutrition') or has_word(text, 'ingredients') or has_word(text, 'allergen')
         or ADDRESS_RE.search(low) or MFG_RE.search(low) or EXP_RE.search(low)
+        or re.match(r'^\s*(?:may\s+)?contains?\b', low)
         or has_word(text, 'fssai') or re.search(r'\blic(?:ence|ense)?\b', low)
         or re.search(r'\bnet\s*(?:wt|weight|qty|quantity|content)', low)
     )
@@ -245,30 +246,46 @@ def collect_after_header(lines, start_index, limit=12):
     return block
 
 
-def find_ingredients(lines, vision_result):
-    block = lines_in_boxes(lines, boxes_of(vision_result, 'ingredients'))
+def ingredients_from(block):
+    """Returns (text, confidence, has_heading) for a block of lines, or None."""
     if not block:
-        for i, line in enumerate(lines):
-            if has_word(line['text'], 'ingredients') or has_word(line['text'], 'ingredient', 85):
-                block = collect_after_header(lines, i)
-                break
-    if not block:
-        return missing()
-    text = clean_text(' '.join(l['text'] for l in block))
-    text = strip_header(text, 'ingredients')
-    text = text.rstrip(' .')
+        return None
+    raw = clean_text(' '.join(l['text'] for l in block))
+    text = strip_header(raw, 'ingredients').rstrip(' .')
     if len(text) < 8:
-        return missing()
-    return found(text, min_conf(block))
+        return None
+    has_heading = has_word(raw, 'ingredients') or has_word(raw, 'ingredient', 85)
+    return text, min_conf(block), has_heading
+
+
+def find_ingredients(lines, vision_result):
+    """Uses the YOLO box when it looks right, otherwise searches the OCR text."""
+    boxed = ingredients_from(lines_in_boxes(lines, boxes_of(vision_result, 'ingredients')))
+    if boxed and (boxed[2] or ',' in boxed[0]):
+        return found(boxed[0], boxed[1])
+    for i, line in enumerate(lines):
+        if has_word(line['text'], 'ingredients') or has_word(line['text'], 'ingredient', 85):
+            result = ingredients_from(collect_after_header(lines, i))
+            if result:
+                return found(result[0], result[1])
+            break
+    return missing()
 
 
 def find_allergens(lines, vision_result):
+    """Uses the YOLO box when it looks like an allergen statement, otherwise searches the OCR text."""
     block = lines_in_boxes(lines, boxes_of(vision_result, 'allergen'))
     if block:
-        text = clean_text(' '.join(l['text'] for l in block))
-        text = strip_header(text, 'allergen') if has_word(text, 'allergen') else text
-        text = strip_header(text, 'contains') if has_word(text, 'contains') else text
-        return found(text.rstrip(' .'), min_conf(block)) if len(text) >= 3 else missing()
+        raw = clean_text(' '.join(l['text'] for l in block))
+        low = raw.lower()
+        looks_right = (has_word(raw, 'allergen') or has_word(raw, 'allergy') or has_word(raw, 'contains')
+                       or any(re.search(r'\b' + w + r'\b', low) for w in ALLERGEN_WORDS))
+        if looks_right:
+            text = strip_header(raw, 'allergen') if has_word(raw, 'allergen') else raw
+            text = strip_header(text, 'contains') if has_word(text, 'contains') else text
+            text = text.strip(' .')
+            if len(text) >= 3:
+                return found(text, min_conf(block))
     for line in lines:
         low = line['text'].lower()
         statement = has_word(line['text'], 'allergen') or has_word(line['text'], 'allergy')
@@ -319,15 +336,8 @@ def number_and_unit(text):
     return to_float(match.group(1)), (match.group(2) or '')
 
 
-def find_nutrition(lines, vision_result):
-    block = lines_in_boxes(lines, boxes_of(vision_result, 'nutrition_table'))
-    if not block:
-        for i, line in enumerate(lines):
-            if has_word(line['text'], 'nutrition') or has_word(line['text'], 'nutritional'):
-                block = collect_after_header(lines, i, limit=14)
-                break
-    if not block:
-        return missing()
+def parse_nutrition(block):
+    """Reads nutrient values from a block of lines. Returns (values, used_lines) or None."""
     values, used = {}, []
     for i, line in enumerate(block):
         key = nutrient_key(line['text'])
@@ -362,9 +372,28 @@ def find_nutrition(lines, vision_result):
         if source is not line:
             used.append(source)
     if not values:
+        return None
+    return {k: values[k] for k in NUTRIENT_KEYS if k in values}, used
+
+
+def find_nutrition(lines, vision_result):
+    """Reads the YOLO box and also the text after a 'Nutrition' heading, and keeps the fuller result."""
+    options = []
+    box_block = lines_in_boxes(lines, boxes_of(vision_result, 'nutrition_table'))
+    if box_block:
+        parsed = parse_nutrition(box_block)
+        if parsed:
+            options.append(parsed)
+    for i, line in enumerate(lines):
+        if has_word(line['text'], 'nutrition') or has_word(line['text'], 'nutritional'):
+            parsed = parse_nutrition(collect_after_header(lines, i, limit=14))
+            if parsed:
+                options.append(parsed)
+            break
+    if not options:
         return missing()
-    ordered = {k: values[k] for k in NUTRIENT_KEYS if k in values}
-    return found(ordered, min_conf(used))
+    values, used = max(options, key=lambda option: len(option[0]))
+    return found(values, min_conf(used))
 
 
 def format_quantity(number, unit):

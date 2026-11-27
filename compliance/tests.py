@@ -141,6 +141,70 @@ class NoisyTextTests(unittest.TestCase):
         self.assertEqual(verdict, 'NON_COMPLIANT')
 
 
+class BoxAndTextTests(unittest.TestCase):
+    """The text step must still work when a YOLO box is missing or wrong."""
+
+    def box(self, class_name, y1, y2, confidence=0.9):
+        return {'class': class_name, 'confidence': confidence, 'box': [0, y1, 700, y2]}
+
+    def test_ingredients_box_in_empty_area_falls_back_to_text(self):
+        vision = make_vision(
+            [('INGREDIENTS: Rice flour, Salt, Oil', 100), ('Net Wt. 100 g', 300)],
+            [self.box('ingredients', 800, 900)])
+        self.assertEqual(extract_fields(vision)['ingredients']['value'], 'Rice flour, Salt, Oil')
+
+    def test_ingredients_box_over_wrong_line_falls_back_to_text(self):
+        vision = make_vision(
+            [('INGREDIENTS: Rice flour, Salt, Oil', 100), ('Net Wt. 100 g', 300)],
+            [self.box('ingredients', 290, 340)])
+        self.assertEqual(extract_fields(vision)['ingredients']['value'], 'Rice flour, Salt, Oil')
+
+    def test_ingredients_box_without_heading_text_is_used(self):
+        vision = make_vision(
+            [('Wheat flour, Sugar, Palm oil, Salt', 100)],
+            [self.box('ingredients', 90, 140)])
+        self.assertEqual(extract_fields(vision)['ingredients']['value'], 'Wheat flour, Sugar, Palm oil, Salt')
+
+    def test_no_boxes_at_all_text_only(self):
+        vision = make_vision([
+            ('INGREDIENTS: Rice flour, Salt', 100),
+            ('Contains: Milk', 140),
+            ('FSSAI Lic. No. 10012345678901', 200)])
+        fields = extract_fields(vision)
+        self.assertEqual(fields['ingredients']['value'], 'Rice flour, Salt')
+        self.assertEqual(fields['allergens']['value'], 'Milk')
+        self.assertEqual(fields['fssai_licence_number']['value'], '10012345678901')
+
+    def test_allergen_box_over_wrong_line_falls_back_to_text(self):
+        vision = make_vision(
+            [('Net Wt. 100 g', 100), ('Contains: Milk and Wheat', 300)],
+            [self.box('allergen', 90, 140)])
+        self.assertEqual(extract_fields(vision)['allergens']['value'], 'Milk and Wheat')
+
+    def test_nutrition_keeps_the_fuller_result(self):
+        vision = make_vision([
+            ('NUTRITION INFORMATION', 100),
+            ('Energy 450 kcal', 140),
+            ('Protein 7 g', 180),
+            ('Carbohydrate 76 g', 220),
+            ('Total Fat 14 g', 260)],
+            [self.box('nutrition_table', 130, 170)])
+        values = extract_fields(vision)['nutrition']['value']
+        self.assertEqual(sorted(values), ['carbohydrate_g', 'energy_kcal', 'protein_g', 'total_fat_g'])
+
+    def test_licence_box_over_wrong_line_still_finds_number(self):
+        vision = make_vision(
+            [('Net Wt. 100 g', 100), ('FSSAI Lic. No. 10012345678901', 300)],
+            [self.box('fssai_no', 90, 140)])
+        self.assertEqual(extract_fields(vision)['fssai_licence_number']['value'], '10012345678901')
+
+    def test_low_confidence_detection_is_ignored(self):
+        vision = make_vision([('x', 100)], [self.box('fssai_logo', 0, 50, confidence=0.1)])
+        results, _, _ = evaluate_rules(DEFAULT_RULES, extract_fields(vision), vision['detections'])
+        r09 = [r for r in results if r['rule_id'] == 'R09'][0]
+        self.assertEqual(r09['status'], 'FAIL')
+
+
 class ScoringTests(unittest.TestCase):
     def test_all_pass_is_compliant(self):
         rules = [{'rule_id': 'A', 'name': 'x', 'check_type': 'field_found',
