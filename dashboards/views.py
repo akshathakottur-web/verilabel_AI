@@ -207,6 +207,25 @@ class InspectorBatchDetailView(APIView):
         return Response(data)
 
 
+class InspectorScansView(APIView):
+    """Scans uploaded by inspectors, newest first, as a plain list.
+    ?scope=mine (default): only the signed-in inspector's scans.
+    ?scope=all: every inspector's scans."""
+    permission_classes = [IsAuthenticated, IsInspectorOrAdmin]
+
+    def get(self, request):
+        scope = request.query_params.get("scope", "mine")
+        if scope not in ("mine", "all"):
+            return error('scope must be "mine" or "all".')
+
+        scans = Scan.objects.filter(uploaded_by__role="inspector").select_related(
+            "uploaded_by", "reviewed_by"
+        )
+        if scope == "mine":
+            scans = scans.filter(uploaded_by=request.user)
+        return Response(ScanSerializer(scans, many=True).data)
+
+
 # --------------------------------------------- Inspector: customer scans, review
 
 class CustomerScansView(APIView):

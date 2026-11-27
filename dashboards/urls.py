@@ -7,6 +7,7 @@ from .views import (
     InspectorBatchDetailView,
     InspectorBatchListView,
     InspectorListCreateView,
+    InspectorScansView,
     ReviewScanView,
     RuleDetailView,
     RuleListCreateView,
@@ -20,6 +21,7 @@ urlpatterns = [
     path("admin/stats/", AdminStatsView.as_view()),
     path("inspector/batches/", InspectorBatchListView.as_view()),
     path("inspector/batches/<int:batch_id>/", InspectorBatchDetailView.as_view()),
+    path("inspector/scans/", InspectorScansView.as_view()),
     path("inspector/customer-scans/", CustomerScansView.as_view()),
     path("inspector/scans/<int:scan_id>/review/", ReviewScanView.as_view()),
 ]
