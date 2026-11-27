@@ -2,13 +2,13 @@
 
 detect_objects(img) returns a list of:
     {"class": "veg_symbol", "confidence": 0.91, "box": [x1, y1, x2, y2]}
-Box is in pixels of the ORIGINAL photo. In Phase 5 this is converted to
-the exact shape in contracts/.
+Box is in pixels of the ORIGINAL photo (the image passed in).
 The model is loaded ONCE and reused.
 """
 from pathlib import Path
 
-MODEL_PATH = Path("ml_data/models/verilabel_yolov8n.pt")
+# Found relative to this file, so it works from any working folder.
+MODEL_PATH = Path(__file__).resolve().parent.parent / "ml_data" / "models" / "verilabel_yolov8n.pt"
 
 _model = None
 

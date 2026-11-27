@@ -1,12 +1,14 @@
 """Member 2 owns this file.
 
-analyze_image(image_path) must return a VISION RESULT exactly as described in
+analyze_image(image_path) returns a VISION RESULT exactly as described in
 contracts/PIPELINE_CONTRACT.md (image_quality, detections, ocr_lines).
 
-Until Member 2 finishes, Member 1's pipeline uses mocks/vision_result_sample.json
-(see USE_MOCK_VISION in .env), so this placeholder is never called.
+Member 1's pipeline calls this when USE_MOCK_VISION=False.
+Models (YOLO, EasyOCR) load once per process on the first call, so the
+first scan is slower than the rest.
 """
+from ai_vision.vision_step import run_vision
 
 
 def analyze_image(image_path):
-    raise NotImplementedError("Member 2: replace this with the real image cleaning, YOLO and EasyOCR steps.")
+    return run_vision(image_path)

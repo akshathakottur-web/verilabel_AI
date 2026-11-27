@@ -1,7 +1,4 @@
-"""Run the quality check on every image in a folder (and its subfolders).
-
-Run from the repo root:  python -m ai_vision.test_quality ml_data/samples
-"""
+"""Run the quality check on every image in a folder (and its subfolders)."""
 import sys
 from pathlib import Path
 
@@ -22,19 +19,19 @@ def main():
         print("No images found in", folder)
         return
 
-    print("%-45s %-8s %9s %10s  %s" % ("file", "quality", "sharpness", "brightness", "reason"))
-    print("-" * 115)
+    print("%-40s %-8s %9s %10s  %s" % ("file", "quality", "sharpness", "brightness", "reason"))
+    print("-" * 110)
     for path in files:
         img = load_image(path)
         name = str(path.relative_to(folder))
         if img is None:
-            print("%-45s could not be read" % name[-45:])
+            print("%-40s could not be read" % name)
             continue
         r = check_quality(img)
         m = r["metrics"]
         print(
-            "%-45s %-8s %9s %10s  %s"
-            % (name[-45:], r["image_quality"], m["sharpness"], m["brightness"], r["reason"])
+            "%-40s %-8s %9s %10s  %s"
+            % (name[:40], r["image_quality"], m["sharpness"], m["brightness"], r["reason"])
         )
 
 

@@ -21,7 +21,7 @@ from ai_vision.image_cleaning import clean_image
 VARIANTS = ["gray", "clahe", "upscale"]
 
 # Set to False to skip Hindi completely (faster, English only).
-USE_HINDI = True
+USE_HINDI = False
 
 # A Hindi line must be at least this share Devanagari letters, and this confident.
 MIN_HINDI_SHARE = 0.6
