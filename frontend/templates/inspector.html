@@ -7,6 +7,12 @@
   <link rel="icon" href="data:,">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/css/staff.css">
+  <style>
+    .mini-stats { display: flex; flex-wrap: wrap; gap: 12px; margin: 12px 0 16px; }
+    .mini-stat { background: #e6f2ed; border-radius: 14px; padding: 10px 18px; min-width: 130px; }
+    .mini-stat strong { display: block; font-size: 22px; color: #0f3d2e; }
+    .mini-stat span { font-size: 13px; color: #4d6b62; }
+  </style>
 </head>
 <body>
   <div id="navbar"></div>
@@ -22,6 +28,20 @@
       <ul class="st-files" id="fileList"></ul>
       <button class="st-btn" id="batchBtn" type="button" disabled>Check all labels</button>
       <div class="st-error" id="batchMsg" role="alert"></div>
+    </section>
+
+    <section class="st-card">
+      <h2>My batches</h2>
+      <p class="st-muted">All the labels you have scanned, with their review status.</p>
+      <div class="mini-stats" id="mineCounts"></div>
+      <p class="st-muted hidden" id="mineEmpty">You have not scanned any labels yet. Upload your first batch above.</p>
+      <div class="st-wrap hidden" id="mineWrap">
+        <table class="st-table">
+          <thead><tr><th>Product</th><th>Score</th><th>Verdict</th><th>Status</th><th>Review</th><th></th><th></th></tr></thead>
+          <tbody id="mineBody"></tbody>
+        </table>
+      </div>
+      <div class="st-error" id="mineMsg" role="alert"></div>
     </section>
 
     <section class="st-card">
@@ -41,7 +61,7 @@
       <p class="st-muted" id="detailSummary"></p>
       <div class="st-wrap">
         <table class="st-table">
-          <thead><tr><th>Product</th><th>Score</th><th>Verdict</th><th>Status</th><th>Review</th><th></th></tr></thead>
+          <thead><tr><th>Product</th><th>Score</th><th>Verdict</th><th>Status</th><th>Review</th><th></th><th></th></tr></thead>
           <tbody id="detailBody"></tbody>
         </table>
       </div>
@@ -65,12 +85,25 @@
     </div>
   </div>
 
+  <div class="st-overlay hidden" id="byModal" role="dialog" aria-modal="true" aria-labelledby="byTitle">
+    <div class="st-modal">
+      <h3 id="byTitle">Reviewed by</h3>
+      <p><strong>Inspector ID:</strong> <span id="byName"></span></p>
+      <p><strong>Name and designation:</strong> <span id="byNote"></span></p>
+      <p><strong>Date:</strong> <span id="byDate"></span></p>
+      <div class="st-row">
+        <button class="st-btn st-btn-light" id="byClose" type="button">Close</button>
+      </div>
+    </div>
+  </div>
+
   <script src="/static/js/config.js"></script>
   <script src="/static/js/demo-banner.js"></script>
   <script src="/static/js/mockdata.js"></script>
   <script src="/static/js/api.js"></script>
   <script src="/static/js/layout.js"></script>
   <script src="/static/js/staff-api.js"></script>
+  <script src="/static/js/inspector_common.js"></script>
   <script src="/static/js/inspector_page.js"></script>
 </body>
 </html>

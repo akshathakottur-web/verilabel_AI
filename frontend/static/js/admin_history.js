@@ -17,14 +17,14 @@
   const tableWrap = document.getElementById("tableWrap");
 
   function reviewText(sc) {
-    if (!sc.reviewed) return "Not reviewed";
-    const note = sc.review_note ? sc.review_note + " - " : "";
+    if (!isReviewed(sc)) return "Not reviewed";
+    const note = reviewNote(sc) ? reviewNote(sc) + " - " : "";
     return note + reviewLine(sc);
   }
 
   function pick() {
-    if (view === "reviewed") return all.filter(function (s) { return s.reviewed; });
-    if (view === "not") return all.filter(function (s) { return !s.reviewed; });
+    if (view === "reviewed") return all.filter(function (s) { return isReviewed(s); });
+    if (view === "not") return all.filter(function (s) { return !isReviewed(s); });
     return all;
   }
 
@@ -42,10 +42,11 @@
 
     list.forEach(function (sc) {
       const tr = document.createElement("tr");
+      const score = scanScore(sc);
       [
         fmtDate(sc.created_at),
-        sc.product_name || "Unknown product",
-        (sc.score === null || sc.score === undefined) ? "N/A" : sc.score + "/100"
+        scanName(sc),
+        score === null ? "N/A" : score + "/100"
       ].forEach(function (t) {
         const td = document.createElement("td");
         td.textContent = t;
@@ -66,13 +67,14 @@
   });
 
   async function load() {
+    // Real API: GET /api/admin/history/ gives a plain list of scan records.
     const res = await apiGet("adminHistory");
     if (!res.ok) { document.getElementById("msg").textContent = res.error; return; }
     all = asList(res.data, "scans").slice().sort(function (a, b) {
       return new Date(b.created_at) - new Date(a.created_at);
     });
-    document.getElementById("nReviewed").textContent = all.filter(function (s) { return s.reviewed; }).length;
-    document.getElementById("nNot").textContent = all.filter(function (s) { return !s.reviewed; }).length;
+    document.getElementById("nReviewed").textContent = all.filter(function (s) { return isReviewed(s); }).length;
+    document.getElementById("nNot").textContent = all.filter(function (s) { return !isReviewed(s); }).length;
     document.getElementById("nTotal").textContent = all.length;
     render();
   }

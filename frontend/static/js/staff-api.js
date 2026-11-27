@@ -1,4 +1,5 @@
 // Helpers for the Inspector, Admin and History pages, plus their fake server (demo mode only).
+// The fake server returns the same shapes as the real Django API in dashboards/views.py.
 
 // The 11 default rules, in the same shape as the real backend (compliance/default_rules.py).
 const MOCK_DEFAULT_RULES = [
@@ -34,7 +35,7 @@ function fmtDate(value) {
   return isNaN(d.getTime()) ? "" : d.toLocaleString("en-IN");
 }
 
-// Tolerant readers: they accept both the demo data and the real SCAN RECORD.
+// ---------- Readers for the real SCAN RECORD ----------
 function scanName(s) {
   return s.product_name ||
     (s.extracted_fields && s.extracted_fields.food_name && s.extracted_fields.food_name.value) ||
@@ -45,15 +46,27 @@ function scanScore(s) {
   if (s.compliance_result && s.compliance_result.score !== undefined) return s.compliance_result.score;
   return null;
 }
+// The verdict CODE: "COMPLIANT", "PARTIAL", "NON_COMPLIANT" or "" when there is none.
 function scanVerdict(s) {
-  return s.verdict || (s.compliance_result && s.compliance_result.verdict) || "";
+  return (s.compliance_result && s.compliance_result.verdict) || "";
+}
+function verdictLabel(code) {
+  if (code === "COMPLIANT") return "Compliant";
+  if (code === "PARTIAL") return "Partially compliant";
+  if (code === "NON_COMPLIANT") return "Non-compliant";
+  return "Not available";
+}
+function verdictClass(code) {
+  if (code === "COMPLIANT") return "good";
+  if (code === "PARTIAL") return "mid";
+  if (code === "NON_COMPLIANT") return "bad";
+  return "";
 }
 function scanRules(s) {
-  return s.rules ||
-    (s.compliance_result && (s.compliance_result.rule_results || s.compliance_result.rules)) || [];
+  return (s.compliance_result && s.compliance_result.rules) || [];
 }
-function ruleName(r) { return r.name || r.rule_name || "Rule"; }
-function ruleResult(r) { return r.result || r.status || ""; }
+function ruleName(r) { return r.name || "Rule"; }
+function ruleResult(r) { return r.status || ""; }   // "PASS" or "FAIL"
 
 const STATUS_LABELS = {
   queued: "Waiting", processing: "Checking", done: "Done",
@@ -65,23 +78,20 @@ function statusClass(status) {
   return "mid";
 }
 
-// ---------- Review information (who reviewed, and when) ----------
-// Real record: review { status: "pending" | "reviewed", reviewed_by, reviewed_at }.
-// Demo data: reviewed, reviewed_by, reviewed_at, review_note.
+// ---------- Review information ----------
+// Real record: review { status: "pending" | "reviewed", reviewed_by, reviewed_at, review_note }
 function isReviewed(s) {
-  if (s.review && s.review.status) return s.review.status === "reviewed";
-  return !!(s.reviewed || (s.review && s.review.reviewed));
+  return !!(s.review && s.review.status === "reviewed");
 }
 function reviewLine(s) {
-  const by = s.reviewed_by || (s.review && s.review.reviewed_by) || "";
-  const at = s.reviewed_at || (s.review && s.review.reviewed_at) || "";
+  const r = s.review || {};
   let text = "";
-  if (by) text = "by " + by;
-  if (at) text += (text ? " on " : "On ") + fmtDate(at);
+  if (r.reviewed_by) text = "by " + r.reviewed_by;
+  if (r.reviewed_at) text += (text ? " on " : "On ") + fmtDate(r.reviewed_at);
   return text || "Review details not available";
 }
 function reviewNote(s) {
-  return s.review_note || (s.review && (s.review.review_note || s.review.note)) || "";
+  return (s.review && s.review.review_note) || "";
 }
 
 // Many photos at once (inspector). Contract: form field "images".
@@ -101,28 +111,45 @@ function apiPostId(pathKey, id, body) {
 
 // ---------- Fake server for inspector and admin ----------
 const STAFF_KEY = "verilabel_mock_staff";
+const STAFF_VERSION = 2;
 
-function seedStaffState() {
-  const names = ["Masala Oats", "Salted Chips", "Fruit Drink", "Instant Noodles"];
-  const fails = [
-    ["Allergen declaration"],
-    [],
-    ["Manufacturer address", "FSSAI logo", "Net quantity", "Veg / non-veg mark", "Allergen declaration"],
-    ["FSSAI licence number", "Allergen declaration"]
-  ];
+function makeMockBatch(batchId, firstScanId, owner, day, names, fails) {
   const scans = names.map(function (n, i) {
-    const r = buildMockRecord(100 + i, n, fails[i]);
-    r.created_at = "2026-11-23T11:0" + i + ":00";
+    const r = buildMockRecord(firstScanId + i, n, fails[i], null, owner);
+    r.batch_id = batchId;
+    r.created_at = day + "T11:0" + i + ":00";
     return r;
   });
-  scans[0].reviewed = true;
-  scans[0].reviewed_by = "Inspector One";
-  scans[0].reviewed_at = "2026-11-24T14:32:00";
-  scans[0].review_note = "A. Kumar, Food Safety Officer";
+  return { id: batchId, created_at: day + "T11:00:00", scans: scans };
+}
+
+function seedStaffState() {
+  const inspectorOne = { user_id: "inspector1", name: "Inspector One", role: "inspector" };
+  const inspectorTwo = { user_id: "inspector2", name: "Inspector Two", role: "inspector" };
+
+  const batch1 = makeMockBatch(1, 100, inspectorOne, "2026-11-23",
+    ["Masala Oats", "Salted Chips", "Fruit Drink", "Instant Noodles"],
+    [
+      ["Allergen declaration"],
+      [],
+      ["Manufacturer name and address", "FSSAI logo", "Net quantity", "Veg / non-veg symbol", "Allergen declaration"],
+      ["FSSAI licence number (14 digits)", "Allergen declaration"]
+    ]);
+  markReviewed(batch1.scans[0], "inspector1", "2026-11-24T14:32:00", "A. Kumar, Food Safety Officer");
+
+  const batch2 = makeMockBatch(2, 110, inspectorTwo, "2026-11-25",
+    ["Chocolate Spread", "Fruit Jam", "Cream Biscuits"],
+    [
+      ["FSSAI logo"],
+      [],
+      ["Allergen declaration", "Net quantity"]
+    ]);
+  markReviewed(batch2.scans[1], "inspector2", "2026-11-26T10:20:00", "R. Nair, Food Analyst");
 
   return {
-    next_scan: 200, next_batch: 2, next_rule: MOCK_DEFAULT_RULES.length + 1,
-    batches: [{ id: 1, created_at: "2026-11-23T11:00:00", scans: scans }],
+    version: STAFF_VERSION,
+    next_scan: 200, next_batch: 3, next_rule: MOCK_DEFAULT_RULES.length + 1,
+    batches: [batch2, batch1],
     rules: JSON.parse(JSON.stringify(MOCK_DEFAULT_RULES))
   };
 }
@@ -132,8 +159,12 @@ function loadStaffState() {
     const raw = localStorage.getItem(STAFF_KEY);
     if (raw) {
       const st = JSON.parse(raw);
-      // Old saved demo data (without rule_id) is thrown away and rebuilt.
-      if (st && Array.isArray(st.batches) && Array.isArray(st.rules) && st.rules[0] && st.rules[0].rule_id) return st;
+      // Old saved demo data (old shape or old version) is thrown away and rebuilt.
+      const rulesOk = st && Array.isArray(st.rules) && st.rules[0] && st.rules[0].rule_id;
+      const scansOk = st && Array.isArray(st.batches) && st.batches.every(function (b) {
+        return b.scans.every(function (s) { return s.review && s.review.status && s.compliance_result !== undefined; });
+      });
+      if (rulesOk && scansOk && st.version === STAFF_VERSION) return st;
     }
   } catch (e) { /* use the seed */ }
   return seedStaffState();
@@ -142,12 +173,19 @@ function saveStaffState(st) {
   try { localStorage.setItem(STAFF_KEY, JSON.stringify(st)); } catch (e) { /* ignore */ }
 }
 
+// A scan that was just uploaded moves from queued to processing to done.
+// While it is not done it has no score and no result, like the real API.
 function withStatus(scan) {
   const copy = JSON.parse(JSON.stringify(scan));
   if (copy.started) {
     const elapsed = Date.now() - copy.started;
     if (elapsed < 2000) copy.status = "queued";
     else if (elapsed < 5000) copy.status = "processing";
+    if (copy.status !== "done") {
+      copy.score = null;
+      copy.compliance_result = null;
+      copy.extracted_fields = null;
+    }
   }
   return copy;
 }
@@ -156,6 +194,41 @@ function allMockScans(st) {
   let all = [];
   st.batches.forEach(function (b) { all = all.concat(b.scans.map(withStatus)); });
   return all.concat(loadMockScans());
+}
+
+function newestFirst(list) {
+  return list.slice().sort(function (a, b) { return new Date(b.created_at) - new Date(a.created_at); });
+}
+
+function batchOwnerId(b) {
+  return (b.scans[0] && b.scans[0].uploaded_by && b.scans[0].uploaded_by.user_id) || "";
+}
+
+// Like the real API: an inspector sees their own batches, an admin sees all.
+function visibleMockBatches(st) {
+  const me = getSession() || {};
+  if (me.role === "admin") return st.batches;
+  return st.batches.filter(function (b) { return batchOwnerId(b) === me.user_id; });
+}
+
+// One batch row, same fields as the real API.
+function mockBatchRow(b) {
+  const scans = b.scans.map(withStatus);
+  function count(test) { return scans.filter(test).length; }
+  const owner = (b.scans[0] && b.scans[0].uploaded_by) || { user_id: "inspector1", name: "Inspector One" };
+  return {
+    batch_id: b.id,
+    created_at: b.created_at,
+    created_by: { user_id: owner.user_id, name: owner.name },
+    total: scans.length,
+    done: count(function (s) { return s.status === "done"; }),
+    in_progress: count(function (s) { return s.status === "queued" || s.status === "processing"; }),
+    failed: count(function (s) { return s.status === "failed" || s.status === "low_quality"; }),
+    compliant: count(function (s) { return scanVerdict(s) === "COMPLIANT"; }),
+    partial: count(function (s) { return scanVerdict(s) === "PARTIAL"; }),
+    non_compliant: count(function (s) { return scanVerdict(s) === "NON_COMPLIANT"; }),
+    reviewed: count(function (s) { return isReviewed(s); })
+  };
 }
 
 // Same checks as compliance/services.py, so errors look the same in demo and real mode.
@@ -177,52 +250,73 @@ function mockStaffHandle(method, key, opts) {
   if (key === "uploadMany") {
     const files = opts.files || [];
     if (!files.length) return { ok: false, error: "Please choose at least one photo." };
+    const me = getSession() || {};
+    const owner = { user_id: me.user_id || "inspector1", name: me.name || "Inspector One", role: "inspector" };
     const batch = { id: st.next_batch++, created_at: new Date().toISOString(), scans: [] };
     files.forEach(function (f) {
       const failed = RULE_NAMES.filter(function () { return Math.random() < 0.25; });
-      const rec = buildMockRecord(st.next_scan++, f.name.replace(/\.[^.]+$/, ""), failed);
+      const rec = buildMockRecord(st.next_scan++, f.name.replace(/\.[^.]+$/, ""), failed, null, owner);
+      rec.batch_id = batch.id;
       rec.started = Date.now();
       batch.scans.push(rec);
     });
     st.batches.unshift(batch);
     saveStaffState(st);
-    return { ok: true, data: { batch_id: batch.id, scans: batch.scans.map(function (s) { return { scan_id: s.id, status: "queued" }; }) } };
+    return { ok: true, data: { batch_id: batch.id, scans: batch.scans.map(function (s) { return { scan_id: s.scan_id, status: "queued" }; }) } };
   }
 
   if (key === "inspectorBatches") {
-    return { ok: true, data: st.batches.map(function (b) {
-      const scans = b.scans.map(withStatus);
-      const done = scans.filter(function (s) { return s.status === "done"; });
-      return {
-        id: b.id, created_at: b.created_at, total: scans.length,
-        compliant: done.filter(function (s) { return s.verdict === "Compliant"; }).length,
-        non_compliant: done.filter(function (s) { return s.verdict !== "Compliant"; }).length,
-        reviewed: scans.filter(function (s) { return isReviewed(s); }).length
-      };
-    }) };
+    return { ok: true, data: visibleMockBatches(st).map(mockBatchRow) };
   }
 
   if (key === "inspectorBatch") {
-    const b = st.batches.filter(function (x) { return String(x.id) === String(opts.id); })[0];
+    const b = visibleMockBatches(st).filter(function (x) { return String(x.id) === String(opts.id); })[0];
     if (!b) return { ok: false, error: "Batch not found." };
-    return { ok: true, data: { id: b.id, created_at: b.created_at, scans: b.scans.map(withStatus) } };
+    const data = mockBatchRow(b);
+    data.scans = b.scans.map(withStatus);
+    return { ok: true, data: data };
+  }
+
+  // Real API: GET /api/inspector/scans/?scope=mine or ?scope=all (a plain list, newest first)
+  if (key === "inspectorMyScans" || key === "inspectorAllScans") {
+    const meId = (getSession() || {}).user_id;
+    let list = [];
+    st.batches.forEach(function (b) { list = list.concat(b.scans.map(withStatus)); });
+    if (key === "inspectorMyScans") {
+      list = list.filter(function (s) { return s.uploaded_by && s.uploaded_by.user_id === meId; });
+    }
+    return { ok: true, data: newestFirst(list) };
   }
 
   if (key === "inspectorReview") {
-    const text = ((opts.body || {}).confirmation || "").trim();
-    if (text.length < 3) return { ok: false, error: "Please type your confirmation (at least 3 characters)." };
+    // Works for your own batch scans and for customer scans, like the real API.
     let found = null;
+    let customerScans = null;
     st.batches.forEach(function (b) {
-      b.scans.forEach(function (s) { if (String(s.id) === String(opts.id)) found = s; });
+      b.scans.forEach(function (s) { if (String(s.scan_id) === String(opts.id)) found = s; });
     });
+    if (!found) {
+      customerScans = loadMockScans();
+      found = customerScans.filter(function (s) { return String(s.scan_id) === String(opts.id); })[0] || null;
+    }
     if (!found) return { ok: false, error: "Scan not found." };
-    if (found.reviewed) return { ok: false, error: "This scan has already been reviewed." };
-    found.reviewed = true;
-    found.reviewed_at = new Date().toISOString();
-    found.review_note = text;
-    found.reviewed_by = (getSession() || {}).name || "Inspector";
-    saveStaffState(st);
-    return { ok: true, data: { scan_id: found.id, reviewed: true } };
+
+    // A colleague's scan cannot be opened by another inspector (can_view_scan).
+    const me = getSession() || {};
+    if (found.uploaded_by && found.uploaded_by.role === "inspector" &&
+        me.role !== "admin" && found.uploaded_by.user_id !== me.user_id) {
+      return { ok: false, error: "Scan not found." };
+    }
+
+    const text = String((opts.body || {}).confirmation || "").trim();
+    if (withStatus(found).status !== "done") return { ok: false, error: 'Only a finished scan (status "done") can be reviewed.' };
+    if (isReviewed(found)) return { ok: false, error: "This scan has already been reviewed." };
+    if (!text) return { ok: false, error: "Please type the confirmation text." };
+    if (text.length > 1000) return { ok: false, error: "The confirmation text must be at most 1000 characters." };
+
+    markReviewed(found, me.user_id || "inspector1", new Date().toISOString(), text);
+    if (customerScans) saveMockScans(customerScans); else saveStaffState(st);
+    return { ok: true, data: withStatus(found) };
   }
 
   if (key === "adminRules") {
@@ -248,58 +342,75 @@ function mockStaffHandle(method, key, opts) {
     return { ok: true, data: rule };
   }
 
+  // Real API: a plain list of scan records, newest first.
   if (key === "adminHistory") {
-    const all = allMockScans(st);
-    const counts = {};
-    all.forEach(function (s) {
-      if (s.status !== "done") return;
-      const n = scanName(s);
-      counts[n] = (counts[n] || 0) + 1;
-    });
-    const top = Object.keys(counts).map(function (n) { return { name: n, count: counts[n] }; })
-      .sort(function (a, b) { return b.count - a.count; }).slice(0, 5);
-    const scans = all.map(function (s) {
-      return {
-        id: s.id, product_name: scanName(s), created_at: s.created_at, score: scanScore(s),
-        status: s.status, verdict: scanVerdict(s),
-        reviewed: isReviewed(s), reviewed_by: s.reviewed_by || "", reviewed_at: s.reviewed_at || "",
-        review_note: s.review_note || ""
-      };
-    }).sort(function (a, b) { return new Date(b.created_at) - new Date(a.created_at); });
-    return { ok: true, data: { scans: scans, top_products: top } };
+    return { ok: true, data: newestFirst(allMockScans(st)) };
   }
 
   if (key === "adminStats") {
     const everything = allMockScans(st);
-    const all = everything.filter(function (s) { return s.status === "done" && scanScore(s) !== null; });
-    const scores = all.map(scanScore);
-    const avg = scores.length ? Math.round(scores.reduce(function (a, b) { return a + b; }, 0) / scores.length) : 0;
-    const perDay = [];
+    const checked = everything.filter(function (s) { return scanScore(s) !== null; });
+    const scores = checked.map(scanScore);
+    const avg = scores.length ? Math.round(scores.reduce(function (a, b) { return a + b; }, 0) / scores.length) : null;
+
+    const verdictCounts = { COMPLIANT: 0, PARTIAL: 0, NON_COMPLIANT: 0 };
+    checked.forEach(function (s) {
+      const v = scanVerdict(s);
+      if (verdictCounts[v] !== undefined) verdictCounts[v] += 1;
+    });
+
+    const statusCounts = {};
+    everything.forEach(function (s) { statusCounts[s.status] = (statusCounts[s.status] || 0) + 1; });
+
+    // Only days that have scans, like the real API. The page fills in the empty days.
+    const days = {};
+    const today = new Date();
     for (let i = 13; i >= 0; i--) {
-      const d = new Date(); d.setDate(d.getDate() - i);
-      const day = d.toISOString().slice(0, 10);
-      perDay.push({ date: day, count: all.filter(function (s) { return String(s.created_at).slice(0, 10) === day; }).length });
+      const d = new Date(today); d.setDate(d.getDate() - i);
+      days[d.toISOString().slice(0, 10)] = 0;
     }
-    const failCounts = {};
-    all.forEach(function (s) {
+    everything.forEach(function (s) {
+      const day = String(s.created_at).slice(0, 10);
+      if (days[day] !== undefined) days[day] += 1;
+    });
+    const perDay = Object.keys(days).filter(function (d) { return days[d] > 0; })
+      .map(function (d) { return { date: d, count: days[d] }; });
+
+    const productCounts = {};
+    everything.forEach(function (s) {
+      if (!s.product_name) return;
+      productCounts[s.product_name] = (productCounts[s.product_name] || 0) + 1;
+    });
+    const topProducts = Object.keys(productCounts)
+      .map(function (n) { return { product_name: n, count: productCounts[n] }; })
+      .sort(function (a, b) { return b.count - a.count || a.product_name.localeCompare(b.product_name); })
+      .slice(0, 5);
+
+    const failures = {};
+    everything.filter(function (s) { return s.status === "done"; }).forEach(function (s) {
       scanRules(s).forEach(function (r) {
-        if (ruleResult(r) === "FAIL") failCounts[ruleName(r)] = (failCounts[ruleName(r)] || 0) + 1;
+        if (ruleResult(r) !== "FAIL") return;
+        if (!failures[r.rule_id]) failures[r.rule_id] = { rule_id: r.rule_id, name: ruleName(r), failures: 0 };
+        failures[r.rule_id].failures += 1;
       });
     });
+    const mostFailed = Object.keys(failures).map(function (k) { return failures[k]; })
+      .sort(function (a, b) { return b.failures - a.failures; }).slice(0, 5);
+
+    const reviewedCount = everything.filter(function (s) { return isReviewed(s); }).length;
     return { ok: true, data: {
-      total_scans: everything.length,
-      checked_scans: all.length,
-      reviewed: everything.filter(function (s) { return isReviewed(s); }).length,
-      not_reviewed: everything.filter(function (s) { return !isReviewed(s); }).length,
+      total_scanned: everything.length,
+      reviewed: reviewedCount,
+      not_reviewed: everything.length - reviewedCount,
+      checked: checked.length,
       average_score: avg,
+      fully_compliant: verdictCounts.COMPLIANT,
+      verdict_counts: verdictCounts,
+      status_counts: statusCounts,
       scans_per_day: perDay,
-      compliance_breakdown: {
-        compliant: scores.filter(function (x) { return x >= 90; }).length,
-        partial: scores.filter(function (x) { return x >= 60 && x < 90; }).length,
-        non_compliant: scores.filter(function (x) { return x < 60; }).length
-      },
-      most_failed_rules: Object.keys(failCounts).map(function (n) { return { name: n, count: failCounts[n] }; })
-        .sort(function (a, b) { return b.count - a.count; }).slice(0, 5)
+      top_products: topProducts,
+      most_failed_rules: mostFailed,
+      recent_scans: newestFirst(everything).slice(0, 10)
     } };
   }
 

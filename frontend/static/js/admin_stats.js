@@ -96,65 +96,69 @@
     return isNaN(d.getTime()) ? iso : d.getDate() + "/" + (d.getMonth() + 1);
   }
 
+  // The last 14 days, including days with no scans (the API only sends days that have scans).
+  function fillDays(perDay) {
+    const counts = {};
+    (perDay || []).forEach(function (d) { counts[d.date] = d.count; });
+    const items = [];
+    for (let i = 13; i >= 0; i--) {
+      const d = new Date(); d.setDate(d.getDate() - i);
+      const iso = d.toISOString().slice(0, 10);
+      items.push({ label: shortDay(iso), value: counts[iso] || 0 });
+    }
+    return items;
+  }
+
   // Text for the "Reviewed" column.
   function reviewText(sc) {
-    if (!sc.reviewed) return "Not reviewed";
-    const note = sc.review_note ? sc.review_note + " - " : "";
-    if (typeof reviewLine === "function") return note + reviewLine(sc);
-    return note + "Reviewed";
+    if (!isReviewed(sc)) return "Not reviewed";
+    const note = reviewNote(sc) ? reviewNote(sc) + " - " : "";
+    return note + reviewLine(sc);
+  }
+
+  function show(id, value) {
+    document.getElementById(id).textContent = (value === undefined || value === null) ? "-" : value;
   }
 
   async function load() {
     const msg = document.getElementById("msg");
-    const results = await Promise.all([apiGet("adminStats"), apiGet("adminHistory")]);
-    const statsRes = results[0], histRes = results[1];
-    if (!statsRes.ok) { msg.textContent = statsRes.error; return; }
+    // Real API: GET /api/admin/stats/. All the numbers come from the database, so they
+    // always match the History page.
+    const res = await apiGet("adminStats");
+    if (!res.ok) { msg.textContent = res.error; return; }
+    const s = res.data;
 
-    // ASSUMED shapes (ours to define when we write the real API):
-    // stats: total_scans (every scan), reviewed, not_reviewed, average_score and
-    //        compliance_breakdown (checked labels only), scans_per_day[{date,count}],
-    //        most_failed_rules[{name,count}]
-    const s = statsRes.data;
-    const b = s.compliance_breakdown || {};
-    const sum = (b.compliant || 0) + (b.partial || 0) + (b.non_compliant || 0);
+    const vc = s.verdict_counts || {};
+    const sum = (vc.COMPLIANT || 0) + (vc.PARTIAL || 0) + (vc.NON_COMPLIANT || 0);
 
-    function show(id, value) { document.getElementById(id).textContent = (value === undefined || value === null) ? "-" : value; }
-    show("sTotal", s.total_scans);
+    show("sTotal", s.total_scanned);
     show("sReviewed", s.reviewed);
     show("sNot", s.not_reviewed);
-    show("sAvg", s.average_score !== undefined ? s.average_score + "/100" : undefined);
-    show("sGood", sum ? Math.round((b.compliant || 0) / sum * 100) + "%" : undefined);
+    show("sAvg", (s.average_score === null || s.average_score === undefined) ? null : s.average_score + "/100");
+    show("sGood", sum ? Math.round((vc.COMPLIANT || 0) / sum * 100) + "%" : null);
 
-    columnChart(document.getElementById("dayChart"),
-      (s.scans_per_day || []).map(function (d) { return { label: shortDay(d.date), value: d.count }; }),
-      "Scans per day for the last 14 days");
+    columnChart(document.getElementById("dayChart"), fillDays(s.scans_per_day), "Scans per day for the last 14 days");
     donut(document.getElementById("donutChart"), [
-      { label: "Compliant", value: b.compliant || 0, color: "#1b6b4a" },
-      { label: "Partial", value: b.partial || 0, color: "#e8890c" },
-      { label: "Non-compliant", value: b.non_compliant || 0, color: "#c62d22" }
+      { label: "Compliant", value: vc.COMPLIANT || 0, color: "#1b6b4a" },
+      { label: "Partial", value: vc.PARTIAL || 0, color: "#e8890c" },
+      { label: "Non-compliant", value: vc.NON_COMPLIANT || 0, color: "#c62d22" }
     ]);
-    barList(document.getElementById("failBox"), s.most_failed_rules || []);
-
-    if (!histRes.ok) { msg.textContent = histRes.error; return; }
-    // history: scans[{id, product_name, created_at, score, status, reviewed, reviewed_by,
-    //          reviewed_at, review_note}], top_products[{name, count}]
-    const h = histRes.data;
-        // The three top cards come from the same list as the History page, so the numbers always agree.
-    const everyScan = asList(h, "scans");
-    const reviewedCount = everyScan.filter(function (x) { return x.reviewed; }).length;
-    show("sTotal", everyScan.length);
-    show("sReviewed", reviewedCount);
-    show("sNot", everyScan.length - reviewedCount);
-    barList(document.getElementById("topBox"), h.top_products || []);
+    barList(document.getElementById("failBox"), (s.most_failed_rules || []).map(function (r) {
+      return { name: r.name, count: r.failures };
+    }));
+    barList(document.getElementById("topBox"), (s.top_products || []).map(function (p) {
+      return { name: p.product_name, count: p.count };
+    }));
 
     const body = document.getElementById("historyBody");
     body.textContent = "";
-    asList(h, "scans").slice(0, 15).forEach(function (sc) {
+    (s.recent_scans || []).forEach(function (sc) {
       const tr = document.createElement("tr");
+      const score = scanScore(sc);
       [
         fmtDate(sc.created_at),
-        sc.product_name || "Unknown product",
-        (sc.score === null || sc.score === undefined) ? "N/A" : sc.score + "/100"
+        scanName(sc),
+        score === null ? "N/A" : score + "/100"
       ].forEach(function (t) {
         const td = document.createElement("td");
         td.textContent = t;

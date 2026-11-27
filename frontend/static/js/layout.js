@@ -16,7 +16,10 @@ function navItemsFor(role) {
     ];
   }
   if (role === "inspector") {
-    return [{ id: "inspector", label: "Batches", href: P.inspector }];
+    return [
+      { id: "inspector", label: "Batches", href: P.inspector },
+      { id: "inspector_all", label: "All batches", href: P.inspector_all }
+    ];
   }
   if (role === "admin") {
     return [
@@ -55,6 +58,7 @@ function renderNavbar(activeId) {
   if (!user || !holder) return;
 
   const home = homeUrlFor(user.role);
+  // To show the Back button on the home page too, change the next line to: const onHome = false;
   const onHome = window.location.pathname === home;
 
   const links = navItemsFor(user.role).map(function (item) {

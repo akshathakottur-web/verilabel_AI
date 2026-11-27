@@ -26,6 +26,8 @@ const CONFIG = {
     // Inspector
     inspectorBatches: "/api/inspector/batches/",
     inspectorBatch: "/api/inspector/batches/{id}/",
+    inspectorMyScans: "/api/inspector/scans/?scope=mine",
+    inspectorAllScans: "/api/inspector/scans/?scope=all",
     inspectorReview: "/api/inspector/scans/{id}/review/",
 
     // Admin
@@ -43,8 +45,9 @@ const CONFIG = {
     result: "/templates/result.html",
     history: "/templates/history.html",
     inspector: "/templates/inspector.html",
+    inspector_all: "/templates/inspector_all.html",
     admin_rules: "/templates/admin_rules.html",
-        admin_history: "/templates/admin_history.html",
+    admin_history: "/templates/admin_history.html",
     admin_stats: "/templates/admin_stats.html"
   }
 };
