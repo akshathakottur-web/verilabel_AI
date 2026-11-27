@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Verilabel AI - History</title>
+  <link rel="icon" href="data:,">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/staff.css">
+</head>
+<body>
+  <div id="navbar"></div>
+  <main class="st-main">
+    <div class="st-error" id="msg" role="alert" style="color:#ffb4ab"></div>
+
+    <div class="st-tabs" role="group" aria-label="Choose which scans to show">
+      <button class="st-tab" id="tabReviewed" type="button" aria-pressed="false">
+        <span class="num" id="nReviewed">-</span><span class="lab">Reviewed</span>
+      </button>
+      <button class="st-tab" id="tabNot" type="button" aria-pressed="false">
+        <span class="num" id="nNot">-</span><span class="lab">Not reviewed</span>
+      </button>
+      <button class="st-tab active" id="tabTotal" type="button" aria-pressed="true">
+        <span class="num" id="nTotal">-</span><span class="lab">Total scanned labels</span>
+      </button>
+    </div>
+
+    <section class="st-card">
+      <h2 id="listTitle">Total scanned labels</h2>
+      <p class="st-muted hidden" id="emptyBox">Nothing to show here yet.</p>
+      <div class="st-wrap" id="tableWrap">
+        <table class="st-table">
+          <thead><tr><th>Date</th><th>Product</th><th>Score</th><th>Status</th><th>Review</th></tr></thead>
+          <tbody id="historyBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="/static/js/config.js"></script>
+  <script src="/static/js/demo-banner.js"></script>
+  <script src="/static/js/mockdata.js"></script>
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/layout.js"></script>
+  <script src="/static/js/staff-api.js"></script>
+  <script src="/static/js/admin_history.js"></script>
+</body>
+</html>
