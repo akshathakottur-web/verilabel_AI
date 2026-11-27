@@ -11,6 +11,13 @@ import yaml
 
 DATASET = Path("ml_data/dataset")
 
+# The class names the contract allows. Change this if the contract changes.
+EXPECTED = {
+    "allergen", "fssai_no", "ingredients",
+    "nonveg_symbol", "nutrition_table", "veg_symbol",
+}
+MIN_BOXES_TRAIN = 30   # warn if a class has fewer boxes than this in train
+
 
 def count_split(split_dir):
     images_dir = DATASET / split_dir / "images"
@@ -38,9 +45,12 @@ def main():
         names = [names[k] for k in sorted(names)]
     print("Classes in Roboflow order:", names)
 
-    expected = {"fssai_logo", "veg_symbol", "nonveg_symbol", "nutrition_table"}
-    if set(names) != expected:
-        print("WARNING: class names are not the 4 expected ones:", sorted(expected))
+    if set(names) != EXPECTED:
+        print("WARNING: classes do not match the expected list.")
+        print("  Missing from Roboflow:", sorted(EXPECTED - set(names)))
+        print("  Extra in Roboflow:    ", sorted(set(names) - EXPECTED))
+    else:
+        print("Class names match the expected list.")
 
     val_dir = "valid" if (DATASET / "valid").exists() else "val"
     lines = [
@@ -60,7 +70,11 @@ def main():
         print()
         print("%s: %d images" % (split, n_img))
         for i, n in enumerate(names):
-            print("   %-16s %d boxes" % (n, boxes.get(i, 0)))
+            count = boxes.get(i, 0)
+            note = ""
+            if split == "train" and count < MIN_BOXES_TRAIN:
+                note = "   <- few examples, add more photos"
+            print("   %-16s %d boxes%s" % (n, count, note))
 
 
 main()

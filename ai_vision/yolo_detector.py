@@ -26,7 +26,7 @@ def get_model():
     return _model
 
 
-def detect_objects(img, conf=0.25, imgsz=640):
+def detect_objects(img, conf=0.25, imgsz=800):
     """Find the label items in a BGR image."""
     model = get_model()
     result = model.predict(img, imgsz=imgsz, conf=conf, device="cpu", verbose=False)[0]
