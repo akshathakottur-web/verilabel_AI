@@ -107,3 +107,48 @@ Member 3's Admin API calls these functions (from compliance.services import list
 - update_rule(rule_id, data) returns the updated rule; data may hold only the fields to change
 They raise ValueError with a message the page can show. The API returns that as 400 {"error": "message"}.
 Rules in the database are used for every new scan. Changing a rule does not change old scans.
+## Decisions after Member 3's questions (Stage 4)
+
+### Sign-up and roles
+- POST /api/auth/signup/ body: name, user_id, password. role is optional and defaults to "customer".
+- Only customers can sign up on their own. Inspector accounts are created by an Admin (endpoints below).
+  Admin accounts are created by Member 1 with "python manage.py createsuperuser".
+- Sign-up keeps the three fields name, ID and password (the user_id is not made from the name, because names
+  can repeat and may have spaces). user_id may only have letters, digits and @ . + - _ (no spaces).
+
+### Review block in a SCAN RECORD
+review has status ("pending" or "reviewed"), reviewed_by, reviewed_at and review_note.
+POST /api/inspector/scans/<id>/review/ (Member 3) saves the Scan fields review_status = "reviewed",
+reviewed_by = the inspector, reviewed_at = now, review_note = the confirmation text.
+
+### Admin creates inspector logins (Member 3 builds the endpoints)
+- GET /api/admin/inspectors/ returns a list of {user_id, name, role, date_joined}. Use accounts.services.list_inspectors().
+- POST /api/admin/inspectors/ body {user_id, name, password}. Returns 201 with the new inspector (no password).
+  Use accounts.services.create_inspector(data). It raises ValueError with a message, return it as 400 {"error": "message"}.
+
+### Rules API (Member 3 builds)
+- GET /api/admin/rules/ uses list_rules(). POST /api/admin/rules/ uses create_rule(data), returns 201.
+- PUT /api/admin/rules/<rule_id>/ uses update_rule(rule_id, data). It accepts partial data.
+- ValueError means 400 {"error": "message"}. compliance.services.RuleNotFound (a ValueError subclass) means 404.
+- Rule fields are exactly: rule_id, name, check_type, field_key, weight (1 to 10), enabled.
+  Weights are relative importance and do not need to add up to 100. A switched-off rule is skipped and does not
+  appear in compliance_result.rules. The score is recalculated over the remaining rules.
+  rule_id in compliance_result.rules is the same as Rule.rule_id.
+
+### Permissions and errors
+- Use accounts.permissions.IsAdminRole and accounts.permissions.IsInspectorOrAdmin as permission_classes.
+- Authentication is DRF TokenAuthentication (header Authorization: Token <token>), set for all views by default.
+- Every error is {"error": "message"}, including 401 and 403. Only sign-up field problems use {"errors": {...}}.
+
+### Wiring (done by Member 1)
+- config/urls.py includes reports.urls and dashboards.urls under the prefix api/.
+  Member 3 replaces both urls.py files. Routes are written without the api/ prefix, for example
+  path('admin/rules/', ...) in dashboards/urls.py and path('scans/<int:scan_id>/report/', ...) in reports/urls.py.
+  Inspector routes also go in dashboards/urls.py, for example path('inspector/customer-scans/', ...).
+- INSTALLED_APPS already has dashboards and reports.
+
+### Pages
+Any file frontend/templates/<name>.html is served at /app/<name>/ as a plain file (no template tags such as {% %}).
+CSS and JS go in frontend/static/ and are linked as /static/css/x.css and /static/js/x.js.
+/ redirects to /app/signin/. Pass ids in the address, for example /app/result/?scan_id=5.
+Pages keep the token in the browser (localStorage) and call the API with relative paths like /api/scans/.

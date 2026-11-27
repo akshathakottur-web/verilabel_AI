@@ -9,6 +9,9 @@ from .models import Rule
 from .rule_logic import CHECK_TYPE_LABELS, DETECTION_CLASSES
 
 
+
+class RuleNotFound(ValueError):
+    """Raised when a rule ID does not exist. It is still a ValueError."""
 def rule_to_dict(rule):
     return {
         'rule_id': rule.rule_id,
@@ -86,7 +89,7 @@ def create_rule(data):
 def update_rule(rule_id, data):
     rule = Rule.objects.filter(rule_id=rule_id).first()
     if rule is None:
-        raise ValueError(f'Rule {rule_id} was not found.')
+        raise RuleNotFound(f'Rule {rule_id} was not found.')
     values = _clean(data, existing=rule)
     for key, value in values.items():
         setattr(rule, key, value)

@@ -39,9 +39,11 @@ class ScanSerializer(serializers.ModelSerializer):
         result = obj.compliance_result or {}
         return result.get('score')
 
+        
     def get_review(self, obj):
         return {
             'status': obj.review_status,
             'reviewed_by': obj.reviewed_by.username if obj.reviewed_by else None,
             'reviewed_at': obj.reviewed_at,
+            'review_note': obj.review_note,
         }

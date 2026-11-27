@@ -147,6 +147,7 @@
   "review": {
     "status": "pending",
     "reviewed_by": null,
-    "reviewed_at": null
+    "reviewed_at": null,
+    "review_note": ""
   }
 }

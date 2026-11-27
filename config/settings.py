@@ -98,6 +98,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
+        'EXCEPTION_HANDLER': 'config.exceptions.custom_exception_handler',
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
     ],
@@ -113,6 +114,6 @@ CELERY_TIMEZONE = 'Asia/Kolkata'
 # False = use Memurai and a separate Celery worker.
 CELERY_TASK_ALWAYS_EAGER = os.getenv('CELERY_EAGER', 'True') == 'True'
 USE_MOCK_VISION = os.getenv('USE_MOCK_VISION', 'True') == 'True'
-ALLOW_ADMIN_SIGNUP = True
+ALLOW_ADMIN_SIGNUP = False
 # Score limit for the verdict
 VERDICT_PARTIAL_MIN = 70

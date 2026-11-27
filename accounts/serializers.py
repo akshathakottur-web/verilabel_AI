@@ -19,7 +19,7 @@ class SignUpSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=100)
     user_id = serializers.CharField(max_length=150, validators=[UnicodeUsernameValidator()])
     password = serializers.CharField(write_only=True)
-    role = serializers.ChoiceField(choices=['customer', 'inspector', 'admin'])
+    role = serializers.ChoiceField(choices=['customer', 'inspector', 'admin'], required=False, default='customer')
 
     def validate_user_id(self, value):
         if User.objects.filter(username=value).exists():
@@ -33,6 +33,8 @@ class SignUpSerializer(serializers.Serializer):
     def validate_role(self, value):
         if value == 'admin' and not settings.ALLOW_ADMIN_SIGNUP:
             raise serializers.ValidationError('Admin accounts cannot be created here.')
+        if value == 'inspector' and not settings.ALLOW_INSPECTOR_SIGNUP:
+            raise serializers.ValidationError('Inspector accounts are created by an Admin.')
         return value
 
     def create(self, validated_data):
