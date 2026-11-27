@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Verilabel AI - New scan</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <div id="navbar"></div>
+  <main class="app-main">
+    <div class="card">
+      <h2>Check a food label</h2>
+      <p class="up-muted">Take a clear, well-lit photo of the label, or choose one from your device. One photo at a time.</p>
+
+      <div class="dropzone">
+        <div class="up-row">
+          <button class="up-btn up-btn-light" id="cameraBtn" type="button">Use camera</button>
+          <button class="up-btn up-btn-light" id="fileBtn" type="button">Upload photo</button>
+        </div>
+        <input id="fileInput" type="file" accept="image/jpeg,image/png,image/webp" class="hidden">
+        <div id="previewBox" class="up-preview hidden"><img id="preview" alt="Preview of the chosen label photo"></div>
+      </div>
+
+      <button class="up-btn" id="uploadBtn" type="button" disabled>Check this label</button>
+      <div class="up-error" id="msg" role="alert"></div>
+    </div>
+  </main>
+
+  <script src="/static/js/config.js"></script>
+  <script src="/static/js/demo-banner.js"></script>
+  <script src="/static/js/mockdata.js"></script>
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/layout.js"></script>
+  <script src="/static/js/camera.js"></script>
+  <script src="/static/js/upload.js"></script>
+</body>
+</html>

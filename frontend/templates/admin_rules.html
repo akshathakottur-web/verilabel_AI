@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Verilabel AI - FSSAI rules</title>
+  <link rel="icon" href="data:,">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/staff.css">
+</head>
+<body>
+  <div id="navbar"></div>
+  <main class="st-main">
+
+    <section class="st-card">
+      <h2>FSSAI rules</h2>
+      <p class="st-muted" id="weightInfo">Loading...</p>
+      <div class="st-wrap">
+        <table class="st-table">
+          <thead><tr><th>ID</th><th>Rule</th><th>What is checked</th><th>Weight</th><th>Status</th><th></th></tr></thead>
+          <tbody id="rulesBody"></tbody>
+        </table>
+      </div>
+      <div class="st-error" id="listMsg" role="alert"></div>
+    </section>
+
+    <section class="st-card">
+      <h2 id="formTitle">Add a rule</h2>
+
+      <div class="st-field">
+        <label for="ruleName">Rule name</label>
+        <input class="st-input" id="ruleName" type="text" maxlength="200">
+      </div>
+
+      <div class="st-field">
+        <label for="checkType">What the rule checks</label>
+        <select class="st-input" id="checkType"></select>
+      </div>
+
+      <div class="st-field hidden" id="fieldSelectBox">
+        <label for="fieldSelect">Which label item</label>
+        <select class="st-input" id="fieldSelect"></select>
+      </div>
+
+      <div class="st-field hidden" id="fieldTextBox">
+        <label for="fieldText">Details</label>
+        <input class="st-input" id="fieldText" type="text" maxlength="200">
+        <p class="st-small" id="fieldHint"></p>
+      </div>
+
+      <div class="st-field">
+        <label for="ruleWeight">Weight (1 to 10, a higher weight counts more in the score)</label>
+        <input class="st-input" id="ruleWeight" type="number" min="1" max="10" step="1" value="1">
+      </div>
+
+      <div class="st-check">
+        <input id="ruleEnabled" type="checkbox" checked>
+        <label for="ruleEnabled">Rule is switched on</label>
+      </div>
+
+      <div class="st-row">
+        <button class="st-btn" id="saveBtn" type="button">Add rule</button>
+        <button class="st-btn st-btn-light hidden" id="cancelBtn" type="button">Cancel editing</button>
+      </div>
+      <div class="st-error" id="formMsg" role="alert"></div>
+      <div class="st-ok" id="okMsg" role="status"></div>
+      <p class="st-small">Changes apply to new scans only. Old scans keep their results.</p>
+    </section>
+  </main>
+
+  <script src="/static/js/config.js"></script>
+  <script src="/static/js/demo-banner.js"></script>
+  <script src="/static/js/mockdata.js"></script>
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/layout.js"></script>
+  <script src="/static/js/staff-api.js"></script>
+  <script src="/static/js/admin_rules.js"></script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Verilabel AI - History</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/staff.css">
+</head>
+<body>
+  <div id="navbar"></div>
+  <main class="st-main">
+    <section class="st-card">
+      <h2>Your scan history</h2>
+      <p class="st-muted">Every label you have checked. A reviewed result shows who reviewed it and when.</p>
+      <p class="st-muted" id="loading">Loading...</p>
+      <div class="st-error" id="msg" role="alert"></div>
+
+      <p class="hidden" id="emptyBox">You have not scanned anything yet. <a href="/templates/upload.html">Scan your first label</a>.</p>
+
+      <div class="st-wrap hidden" id="tableWrap">
+        <table class="st-table">
+          <thead><tr><th>Date</th><th>Product</th><th>Score</th><th>Status</th><th>Review</th><th></th></tr></thead>
+          <tbody id="historyBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="/static/js/config.js"></script>
+  <script src="/static/js/demo-banner.js"></script>
+  <script src="/static/js/mockdata.js"></script>
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/layout.js"></script>
+  <script src="/static/js/staff-api.js"></script>
+  <script src="/static/js/history.js"></script>
+</body>
+</html>

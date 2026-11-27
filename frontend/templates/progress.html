@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Verilabel AI - Checking</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <div id="navbar"></div>
+  <main class="app-main">
+    <div class="card">
+      <h2>Checking your label</h2>
+      <p class="up-muted" id="statusText">Please wait. This can take a little while.</p>
+      <ul class="steps">
+        <li id="step-queued">1. Photo received</li>
+        <li id="step-processing">2. Reading the label</li>
+        <li id="step-done">3. Checking against FSSAI rules</li>
+      </ul>
+      <div class="up-error" id="msg" role="alert"></div>
+      <div id="failActions" class="up-row hidden">
+        <a class="up-btn" href="/templates/upload.html">Try another photo</a>
+      </div>
+    </div>
+  </main>
+
+  <script src="/static/js/config.js"></script>
+  <script src="/static/js/demo-banner.js"></script>
+  <script src="/static/js/mockdata.js"></script>
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/layout.js"></script>
+  <script src="/static/js/progress.js"></script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Verilabel AI - Statistics</title>
+  <link rel="icon" href="data:,">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/staff.css">
+</head>
+<body>
+  <div id="navbar"></div>
+  <main class="st-main">
+    <div class="st-error" id="msg" role="alert" style="color:#ffb4ab"></div>
+
+    <div class="st-grid">
+      <div class="st-stat"><div class="num" id="sTotal">-</div><div class="lab">Total scanned labels</div></div>
+      <div class="st-stat"><div class="num" id="sReviewed">-</div><div class="lab">Reviewed</div></div>
+      <div class="st-stat"><div class="num" id="sNot">-</div><div class="lab">Not reviewed</div></div>
+      <div class="st-stat"><div class="num" id="sAvg">-</div><div class="lab">Average score (checked labels)</div></div>
+      <div class="st-stat"><div class="num" id="sGood">-</div><div class="lab">Fully compliant (checked labels)</div></div>
+    </div>
+
+    <div class="st-two">
+      <section class="st-card">
+        <h2>Scans per day</h2>
+        <p class="st-muted">Last 14 days</p>
+        <div class="st-chart" id="dayChart"></div>
+      </section>
+      <section class="st-card">
+        <h2>Compliance overview</h2>
+        <p class="st-muted">Share of checked labels</p>
+        <div class="st-chart" id="donutChart"></div>
+      </section>
+    </div>
+
+    <div class="st-two">
+      <section class="st-card">
+        <h2>Top scanned products</h2>
+        <div id="topBox"></div>
+      </section>
+      <section class="st-card">
+        <h2>Most failed rules</h2>
+        <div id="failBox"></div>
+      </section>
+    </div>
+
+    <section class="st-card">
+      <h2>Recent scans</h2>
+      <div class="st-wrap">
+        <table class="st-table">
+          <thead><tr><th>Date</th><th>Product</th><th>Score</th><th>Status</th><th>Reviewed</th></tr></thead>
+          <tbody id="historyBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="/static/js/config.js"></script>
+  <script src="/static/js/demo-banner.js"></script>
+  <script src="/static/js/mockdata.js"></script>
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/layout.js"></script>
+  <script src="/static/js/staff-api.js"></script>
+  <script src="/static/js/admin_stats.js"></script>
+</body>
+</html>

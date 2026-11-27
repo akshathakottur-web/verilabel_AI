@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Verilabel AI - Result</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <div id="navbar"></div>
+  <main class="app-main">
+    <p id="loading">Loading result...</p>
+    <div class="up-error" id="msg" role="alert" style="color:#ffb4ab"></div>
+
+    <div id="resultBox" class="hidden">
+      <div id="qualityBanner" class="warn hidden"></div>
+
+      <div class="card">
+        <h2 id="productName"></h2>
+        <div class="score-row">
+          <div class="score-ring">
+            <svg viewBox="0 0 120 120" aria-hidden="true">
+              <circle cx="60" cy="60" r="52" fill="none" stroke="#e1ece7" stroke-width="12"/>
+              <circle id="ring" cx="60" cy="60" r="52" fill="none" stroke="#1b6b4a" stroke-width="12" stroke-linecap="round" stroke-dasharray="0 327" transform="rotate(-90 60 60)"/>
+            </svg>
+            <div class="score-num" id="score"></div>
+          </div>
+          <div class="verdict" id="verdict"></div>
+        </div>
+        <div class="up-row" style="margin-top:18px">
+          <button class="up-btn" id="pdfBtn" type="button">Download PDF report</button>
+          <a class="up-btn up-btn-light" href="/templates/upload.html">Scan another label</a>
+        </div>
+        <div class="up-error" id="pdfMsg" role="alert"></div>
+      </div>
+
+      <div class="card">
+        <h2>Mandatory items</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Item</th><th>Result</th><th>Reason</th></tr></thead>
+            <tbody id="rulesBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Missing items</h2>
+        <ul class="plain-list" id="missingList"></ul>
+      </div>
+
+      <div class="card">
+        <h2>Better alternatives</h2>
+        <div id="altBox"><p class="up-muted">Loading...</p></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="/static/js/config.js"></script>
+  <script src="/static/js/demo-banner.js"></script>
+  <script src="/static/js/mockdata.js"></script>
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/layout.js"></script>
+  <script src="/static/js/result.js"></script>
+</body>
+</html>

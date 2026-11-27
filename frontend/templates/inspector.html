@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Verilabel AI - Inspector</title>
+  <link rel="icon" href="data:,">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/staff.css">
+</head>
+<body>
+  <div id="navbar"></div>
+  <main class="st-main">
+
+    <section class="st-card">
+      <h2>Upload a batch</h2>
+      <p class="st-muted">Choose many label photos at once (JPG, PNG or WEBP, up to 10 MB each, up to 50 photos).</p>
+      <div class="st-row">
+        <button class="st-btn st-btn-light" id="pickBtn" type="button">Choose photos</button>
+        <input id="filesInput" type="file" accept="image/jpeg,image/png,image/webp" multiple class="hidden">
+      </div>
+      <ul class="st-files" id="fileList"></ul>
+      <button class="st-btn" id="batchBtn" type="button" disabled>Check all labels</button>
+      <div class="st-error" id="batchMsg" role="alert"></div>
+    </section>
+
+    <section class="st-card">
+      <h2>Your batches</h2>
+      <p class="st-muted hidden" id="batchEmpty">No batches yet. Upload your first batch above.</p>
+      <div class="st-wrap hidden" id="batchWrap">
+        <table class="st-table">
+          <thead><tr><th>Batch</th><th>Date</th><th>Photos</th><th>Compliant</th><th>Non-compliant</th><th>Reviewed</th><th></th></tr></thead>
+          <tbody id="batchBody"></tbody>
+        </table>
+      </div>
+      <div class="st-error" id="listMsg" role="alert"></div>
+    </section>
+
+    <section class="st-card hidden" id="detailCard">
+      <h2 id="detailTitle">Batch</h2>
+      <p class="st-muted" id="detailSummary"></p>
+      <div class="st-wrap">
+        <table class="st-table">
+          <thead><tr><th>Product</th><th>Score</th><th>Verdict</th><th>Status</th><th>Review</th><th></th></tr></thead>
+          <tbody id="detailBody"></tbody>
+        </table>
+      </div>
+      <div class="st-error" id="detailMsg" role="alert"></div>
+    </section>
+  </main>
+
+  <div class="st-overlay hidden" id="reviewModal" role="dialog" aria-modal="true" aria-labelledby="reviewTitle">
+    <div class="st-modal">
+      <h3 id="reviewTitle">Mark as reviewed</h3>
+      <p class="st-muted">Type your name and designation to confirm that you have checked this result.</p>
+      <div class="st-field">
+        <label for="reviewText">Confirmation</label>
+        <input class="st-input" id="reviewText" type="text" placeholder="For example: A. Kumar, Food Safety Officer">
+      </div>
+      <div class="st-error" id="reviewMsg" role="alert"></div>
+      <div class="st-row">
+        <button class="st-btn" id="reviewOk" type="button">Confirm</button>
+        <button class="st-btn st-btn-light" id="reviewCancel" type="button">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/js/config.js"></script>
+  <script src="/static/js/demo-banner.js"></script>
+  <script src="/static/js/mockdata.js"></script>
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/layout.js"></script>
+  <script src="/static/js/staff-api.js"></script>
+  <script src="/static/js/inspector_page.js"></script>
+</body>
+</html>

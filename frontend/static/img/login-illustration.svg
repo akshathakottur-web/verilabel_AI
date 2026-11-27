@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 580" role="img" aria-label="A man scanning a food label with his phone">
+  <path d="M50 250C30 150 140 55 280 75C405 92 480 170 468 290C455 405 360 480 250 478C135 476 72 380 50 250Z" fill="#5b9c87"/>
+  <path d="M125 262C115 190 185 128 270 133C352 138 408 200 396 282C385 355 322 405 250 405C178 405 135 340 125 262Z" fill="#a8cfb9"/>
+  <circle cx="75" cy="170" r="30" fill="#d4e8de"/>
+  <circle cx="330" cy="105" r="20" fill="#d4e8de"/>
+  <circle cx="430" cy="215" r="34" fill="#cfe5da"/>
+  <circle cx="440" cy="420" r="38" fill="#d4e8de"/>
+  <circle cx="95" cy="400" r="22" fill="#d4e8de"/>
+  <circle cx="330" cy="500" r="14" fill="#d4e8de"/>
+  <ellipse cx="190" cy="545" rx="150" ry="14" fill="#000" opacity="0.08"/>
+  <path d="M195 215h120l-8 125H203z" fill="#d9a35b"/>
+  <path d="M195 215h120l-4 30H199z" fill="#c78f45"/>
+  <rect x="222" y="150" width="22" height="80" rx="11" fill="#e7b872" transform="rotate(-14 233 190)"/>
+  <rect x="262" y="160" width="16" height="70" rx="6" fill="#b9382b"/>
+  <rect x="266" y="146" width="8" height="18" rx="2" fill="#5a2d1f"/>
+  <path d="M290 235c10-40 40-50 45-35s-15 40-45 35z" fill="#4f9a52"/>
+  <circle cx="338" cy="305" r="30" fill="#4f9a52"/>
+  <path d="M338 275v60M320 280q18 25 0 50M356 280q-18 25 0 50" stroke="#2e6f35" stroke-width="3" fill="none"/>
+  <rect x="150" y="300" width="36" height="46" rx="5" fill="#f4f1e8"/>
+  <rect x="150" y="312" width="36" height="14" fill="#e89a2c"/>
+  <ellipse cx="150" cy="540" rx="30" ry="6" fill="#000" opacity="0.1"/>
+  <rect x="128" y="452" width="20" height="78" rx="8" fill="#2b4a7a"/>
+  <rect x="152" y="452" width="20" height="78" rx="8" fill="#243f69"/>
+  <ellipse cx="136" cy="534" rx="17" ry="8" fill="#4a2f22"/>
+  <ellipse cx="164" cy="534" rx="17" ry="8" fill="#4a2f22"/>
+  <rect x="120" y="378" width="60" height="84" rx="16" fill="#2f80c9"/>
+  <circle cx="150" cy="352" r="22" fill="#f0b48a"/>
+  <path d="M128 350c0-24 44-24 44 0c-10-10-32-12-44 0z" fill="#2a1d17"/>
+  <path d="M168 395L212 372" stroke="#2f80c9" stroke-width="14" stroke-linecap="round"/>
+  <path d="M160 405L250 392" stroke="#2f80c9" stroke-width="14" stroke-linecap="round"/>
+  <circle cx="214" cy="371" r="8" fill="#f0b48a"/>
+  <circle cx="252" cy="392" r="8" fill="#f0b48a"/>
+  <rect x="258" y="338" width="64" height="86" rx="6" fill="#f4c542"/>
+  <rect x="266" y="362" width="48" height="40" rx="3" fill="#fff"/>
+  <path d="M276 382l8 8 16-18" stroke="#1b6b4a" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M222 360L264 366V400L222 392z" fill="#3fbf8a" opacity="0.35"/>
+  <rect x="206" y="340" width="26" height="48" rx="5" fill="#22303a"/>
+  <rect x="210" y="346" width="18" height="34" rx="2" fill="#3fbf8a"/>
+  <path d="M212 352h6M212 352v6M226 352h-6M226 352v6M212 374h6M212 374v-6M226 374h-6M226 374v-6" stroke="#fff" stroke-width="1.6" fill="none"/>
+</svg>
