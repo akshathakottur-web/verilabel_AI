@@ -1,4 +1,3 @@
-
 from celery import shared_task
 
 from compliance.engine import run_compliance
@@ -29,10 +28,14 @@ def process_scan(scan_id):
                 'score': None,
                 'verdict': None,
             }
+            scan.score = None
+            scan.verdict = ''
         else:
             extracted_fields, compliance_result = run_compliance(vision_result)
             scan.extracted_fields = extracted_fields
             scan.compliance_result = compliance_result
+            scan.score = compliance_result.get('score')
+            scan.verdict = compliance_result.get('verdict') or ''
             food_name = (extracted_fields.get('food_name') or {}).get('value') or ''
             scan.product_name = str(food_name)[:200]
             scan.status = 'done'
