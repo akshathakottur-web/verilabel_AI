@@ -152,3 +152,31 @@ Any file frontend/templates/<name>.html is served at /app/<name>/ as a plain fil
 CSS and JS go in frontend/static/ and are linked as /static/css/x.css and /static/js/x.js.
 / redirects to /app/signin/. Pass ids in the address, for example /app/result/?scan_id=5.
 Pages keep the token in the browser (localStorage) and call the API with relative paths like /api/scans/.
+## Scan model for reading (Member 3), final as of Stage 4
+
+Member 1 owns scans/models.py. Member 3 may read and query it, and write ONLY through scans.services.review_scan.
+Changes are announced first, and only add fields. Nothing is renamed or removed.
+
+User: username (the user_id), name, role ("customer", "inspector" or "admin"), date_joined, is_active
+Batch: id, created_by (User), created_at. Its scans are batch.scans.
+Scan:
+- id, uploaded_by (User, user.scans), batch (Batch or null), image (file), created_at
+- status: queued, processing, done, failed, low_quality
+- product_name: text, "" if none
+- score: whole number 0 to 100, or null (queued, processing, failed, low_quality, or no active rules)
+- verdict: "COMPLIANT", "PARTIAL" or "NON_COMPLIANT", or "" when there is no result
+- extracted_fields, compliance_result, vision_result: JSON. Do not query inside the JSON (SQLite and PostgreSQL differ).
+  Use the columns score and verdict for counts and averages. Never return vision_result in an API.
+- error_message: text, only for failed scans
+- review_status: "pending" or "reviewed"; reviewed_by (User or null); reviewed_at; review_note
+
+Return scan records with scans.serializers.ScanSerializer, so the pages always get the contract's shape.
+Check access with scans.permissions.can_view_scan(user, scan).
+
+Review (Member 3's endpoint calls Member 1's function):
+from scans.services import review_scan
+review_scan(scan, request.user, note) raises ValueError with a message (400 {"error": message}) when the scan is not
+"done", is already reviewed, or the text is empty or longer than 1000 characters. It saves the four review fields itself.
+
+Stats ideas that work with these columns: count by verdict, count per day (created_at), average score,
+top scanned products (group by product_name, ignore ""), counts by status.

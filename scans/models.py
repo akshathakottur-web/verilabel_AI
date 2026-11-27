@@ -40,6 +40,8 @@ class Scan(models.Model):
     vision_result = models.JSONField(null=True, blank=True)
     extracted_fields = models.JSONField(null=True, blank=True)
     compliance_result = models.JSONField(null=True, blank=True)
+    score = models.IntegerField(null=True, blank=True)
+    verdict = models.CharField(max_length=20, blank=True)
     error_message = models.TextField(blank=True)
 
     review_status = models.CharField(max_length=20, choices=REVIEW_CHOICES, default='pending')
