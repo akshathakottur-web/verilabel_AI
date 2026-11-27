@@ -22,3 +22,7 @@ runs/
 .idea/
 .DS_Store
 Thumbs.db
+# AI model weights
+*.pt
+*.onnx
+*.pth
